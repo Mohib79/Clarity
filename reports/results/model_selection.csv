@@ -1,0 +1,6 @@
+Order,Smoothing,Delta,Validation_Perplexity
+2,backoff,0.01,16.52
+3,backoff,0.01,13.73
+4,backoff,0.01,11.90
+4,additive,0.01,13.98
+5,backoff,0.01,11.79

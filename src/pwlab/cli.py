@@ -5,13 +5,12 @@ Usage:
     python -m pwlab.cli prepare [--raw PATH] [--sample N] [--max-raw-lines M] [--full] [--config PATH]
     python -m pwlab.cli analyze "Summer2026!"
     python -m pwlab.cli analyze-train [--limit N]
-    python -m pwlab.cli train
+    python -m pwlab.cli train [--max-train N] [--quick] [--order K] [--smoothing TYPE]
     python -m pwlab.cli score "Password123!"
     python -m pwlab.cli evaluate
 """
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -19,6 +18,7 @@ from pwlab.config import load_config
 from pwlab.data.prepare import prepare_dataset
 from pwlab.patterns.taggers import analyze
 from pwlab.patterns.stats import compute_pattern_stats
+from pwlab.model.train import run_model_training_pipeline
 
 
 def cmd_prepare(args):
@@ -117,8 +117,16 @@ def cmd_analyze_train(args):
 
 
 def cmd_train(args):
-    """Stub for model training."""
-    print("[*] Model training module (Plan 03). Use 'python -m pwlab.cli prepare' first.")
+    """Train the statistical n-gram and structure models."""
+    cfg = load_config(args.config)
+    run_model_training_pipeline(
+        config=cfg,
+        train_path=args.train,
+        val_path=args.val,
+        output_model_path=args.output,
+        quick_tune=args.quick,
+        max_train_rows=args.max_train,
+    )
 
 
 def cmd_score(args):
@@ -163,6 +171,11 @@ def main():
 
     # train
     p_train = subparsers.add_parser("train", help="Train the statistical n-gram and structure models")
+    p_train.add_argument("--train", default=None, help="Path to train.tsv (defaults to config)")
+    p_train.add_argument("--val", default=None, help="Path to val.tsv (defaults to config)")
+    p_train.add_argument("--output", default=None, help="Output model path (defaults to models/model.pkl)")
+    p_train.add_argument("--max-train", type=int, default=None, help="Limit number of train items")
+    p_train.add_argument("--quick", action="store_true", help="Run quick validation tuning")
     p_train.set_defaults(func=cmd_train)
 
     # score

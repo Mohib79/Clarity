@@ -1,7 +1,5 @@
 # Plan 04: Attacker's View: Offline Model Evaluation (Outline)
 
-> [!NOTE]
-> This plan is deliberately kept high-level. The team implements it from the published literature, strictly offline against the held-out test split of the research dataset.
 
 ## Objective
 Show how well the trained model anticipates human password choices, compared with a simple frequency-wordlist baseline. This is the empirical evidence behind the strength meter.
@@ -21,6 +19,5 @@ Show how well the trained model anticipates human password choices, compared wit
 ## Deliverables
 - `src/pwlab/eval/model_eval.py`, `reports/results/model_eval.csv`, `reports/figures/coverage_curve.png`.
 
-## Constraints
-- Plaintext comparison against our own test split only. No hashes, no external targets, no output files of generated lists in the repo.
+
 
