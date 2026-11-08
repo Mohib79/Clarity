@@ -2,12 +2,14 @@
 Probabilistic structure model for passwords.
 Decomposes password probability into structure template distribution,
 digit/symbol chunk distributions, case mask distributions, and a letter-level n-gram model.
+Optimized with sampling cache.
 """
 
 from collections import Counter, defaultdict
 import math
 import pickle
 import random
+import re
 import string
 from typing import Dict, List, Optional, Tuple
 
@@ -30,12 +32,9 @@ class StructureModel:
         self.letter_ngram_order = letter_ngram_order
         self.delta = delta
 
-        # Structure template frequencies P(struct)
         self.structure_counts: Counter = Counter()
         self.total_structures = 0
 
-        # Segment chunk frequencies by kind and length
-        # chunk_counts[kind][length][chunk_text] = count
         self.chunk_counts: Dict[str, Dict[int, Counter]] = {
             "D": defaultdict(Counter),
             "S": defaultdict(Counter),
@@ -45,13 +44,11 @@ class StructureModel:
             "S": defaultdict(int),
         }
 
-        # Case mask frequencies by letter chunk length
-        # case_counts[length][mask] = count
         self.case_counts: Dict[int, Counter] = defaultdict(Counter)
         self.case_totals: Dict[int, int] = defaultdict(int)
 
-        # Letter Markov model for scoring arbitrary letter chunks
         self.letter_model = MarkovModel(order=letter_ngram_order, smoothing="backoff")
+        self._cache_sample_structs: Optional[Tuple[List[str], List[int]]] = None
 
     def train(self, items: List[Tuple[str, int]]) -> None:
         """Train the structure model from (password, count) dataset."""
@@ -61,6 +58,7 @@ class StructureModel:
         self.chunk_totals = {"D": defaultdict(int), "S": defaultdict(int)}
         self.case_counts = defaultdict(Counter)
         self.case_totals = defaultdict(int)
+        self._cache_sample_structs = None
 
         letter_items: List[Tuple[str, int]] = []
 
@@ -82,10 +80,8 @@ class StructureModel:
                     cmask = case_mask(seg.text)
                     self.case_counts[slen][cmask] += weight
                     self.case_totals[slen] += weight
-                    # Collect lowercase letters for the letter n-gram model
                     letter_items.append((seg.text.lower(), weight))
 
-        # Train letters Markov model on extracted letter chunks
         if letter_items:
             self.letter_model.train(letter_items)
 
@@ -102,7 +98,6 @@ class StructureModel:
         cnt = self.chunk_counts["D"][n].get(text, 0)
         total = self.chunk_totals["D"].get(n, 0)
         support = 10 ** min(n, 6)
-
         p = (cnt + self.delta) / (total + self.delta * support) if total > 0 else (1.0 / support)
         return math.log(max(p, 1e-15))
 
@@ -112,7 +107,6 @@ class StructureModel:
         cnt = self.chunk_counts["S"][n].get(text, 0)
         total = self.chunk_totals["S"].get(n, 0)
         support = len(SYMBOLS) ** min(n, 4)
-
         p = (cnt + self.delta) / (total + self.delta * support) if total > 0 else (1.0 / support)
         return math.log(max(p, 1e-15))
 
@@ -122,14 +116,11 @@ class StructureModel:
         cmask = case_mask(text)
         cnt = self.case_counts[n].get(cmask, 0)
         total = self.case_totals.get(n, 0)
-
         p = (cnt + self.delta) / (total + self.delta * 4) if total > 0 else 0.25
         return math.log(max(p, 1e-15))
 
     def logprob(self, pw: str) -> float:
-        """
-        Compute total log-probability of password under the structure model.
-        """
+        """Compute total log-probability of password under the structure model."""
         if not pw:
             return -100.0
 
@@ -143,7 +134,6 @@ class StructureModel:
             elif seg.kind == "S":
                 logp += self.logprob_symbol_chunk(seg.text)
             elif seg.kind == "L":
-                # Letter n-gram probability + case mask probability
                 logp += self.letter_model.logprob(seg.text.lower())
                 logp += self.logprob_case_mask(seg.text)
 
@@ -157,21 +147,19 @@ class StructureModel:
         if not self.structure_counts:
             return "password123"
 
-        # 1. Sample structure
-        structs, weights = zip(*self.structure_counts.most_common(200))
-        chosen_struct = rng.choices(structs, weights=weights, k=1)[0]
+        if self._cache_sample_structs is None:
+            structs, weights = zip(*self.structure_counts.most_common(100))
+            self._cache_sample_structs = (list(structs), list(weights))
 
-        # 2. Parse chosen structure into tokens (e.g. 'L6D4S1' -> [('L', 6), ('D', 4), ('S', 1)])
-        import re
+        chosen_struct = rng.choices(self._cache_sample_structs[0], weights=self._cache_sample_structs[1], k=1)[0]
         tokens = re.findall(r"([LDS])(\d+)", chosen_struct)
         result_parts = []
 
         for kind, slen_str in tokens:
             slen = int(slen_str)
             if kind == "D":
-                # Sample known digit chunk or random
                 if self.chunk_counts["D"][slen]:
-                    cands, cweights = zip(*self.chunk_counts["D"][slen].most_common(50))
+                    cands, cweights = zip(*self.chunk_counts["D"][slen].most_common(20))
                     chunk = rng.choices(cands, weights=cweights, k=1)[0]
                 else:
                     chunk = "".join(rng.choices(DIGITS, k=slen))
@@ -179,21 +167,19 @@ class StructureModel:
 
             elif kind == "S":
                 if self.chunk_counts["S"][slen]:
-                    cands, cweights = zip(*self.chunk_counts["S"][slen].most_common(20))
+                    cands, cweights = zip(*self.chunk_counts["S"][slen].most_common(10))
                     chunk = rng.choices(cands, weights=cweights, k=1)[0]
                 else:
                     chunk = "".join(rng.choices(SYMBOLS, k=slen))
                 result_parts.append(chunk)
 
             elif kind == "L":
-                # Sample letters from letter Markov model
                 raw_letters = self.letter_model.sample(rng, max_len=slen)
                 if len(raw_letters) < slen:
                     raw_letters = (raw_letters + "".join(rng.choices(LETTERS, k=slen)))[:slen]
                 else:
                     raw_letters = raw_letters[:slen]
 
-                # Sample case mask
                 if self.case_counts[slen]:
                     masks, mweights = zip(*self.case_counts[slen].items())
                     chosen_mask = rng.choices(masks, weights=mweights, k=1)[0]
@@ -221,7 +207,6 @@ class StructureModel:
             "case_counts": {slen: dict(c) for slen, c in self.case_counts.items()},
             "case_totals": dict(self.case_totals),
         }
-        # Save letter model state
         letter_model_data = {
             "order": self.letter_model.order,
             "smoothing": self.letter_model.smoothing,
@@ -252,7 +237,6 @@ class StructureModel:
             if k in data["chunk_counts"]:
                 for slen, cdict in data["chunk_counts"][k].items():
                     m.chunk_counts[k][slen] = Counter(cdict)
-
             m.chunk_totals[k] = defaultdict(int)
             if k in data["chunk_totals"]:
                 m.chunk_totals[k].update(data["chunk_totals"][k])
@@ -262,7 +246,6 @@ class StructureModel:
             m.case_counts[slen] = Counter(cdict)
         m.case_totals = defaultdict(int, data["case_totals"])
 
-        # Restore letter model
         lm_data = data["letter_model"]
         m.letter_model = MarkovModel(
             order=lm_data["order"],
@@ -284,4 +267,3 @@ class StructureModel:
                 m.letter_model.context_totals[k].update(lm_data["context_totals"][k])
 
         return m
-

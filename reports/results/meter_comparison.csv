@@ -1,0 +1,4 @@
+Meter,Weak_Count,Medium_Count,Strong_Count,Unsafe_Strong_Count,Unsafe_Strong_Rate,Over_Weak_Count,Over_Weak_Rate
+Probabilistic,1193,3194,613,0,0.00%,0,0.00%
+LUDS,3712,1286,2,0,0.00%,427,11.50%
+zxcvbn,3759,945,296,3,1.01%,226,6.01%

@@ -5,9 +5,9 @@ Usage:
     python -m pwlab.cli prepare [--raw PATH] [--sample N] [--max-raw-lines M] [--full] [--config PATH]
     python -m pwlab.cli analyze "Summer2026!"
     python -m pwlab.cli analyze-train [--limit N]
-    python -m pwlab.cli train [--max-train N] [--quick] [--order K] [--smoothing TYPE]
+    python -m pwlab.cli train [--max-train N] [--quick]
     python -m pwlab.cli score "Password123!"
-    python -m pwlab.cli evaluate
+    python -m pwlab.cli evaluate [--all] [--test-limit N]
 """
 
 import argparse
@@ -19,6 +19,10 @@ from pwlab.data.prepare import prepare_dataset
 from pwlab.patterns.taggers import analyze
 from pwlab.patterns.stats import compute_pattern_stats
 from pwlab.model.train import run_model_training_pipeline
+from pwlab.meter.scorer import PasswordScorer
+from pwlab.eval.model_eval import run_evaluation_cli
+from pwlab.eval.meter_eval import run_case_studies, run_meter_benchmark
+from pwlab.eval.plots import generate_all_figures
 
 
 def cmd_prepare(args):
@@ -130,13 +134,66 @@ def cmd_train(args):
 
 
 def cmd_score(args):
-    """Stub for password scoring."""
-    print(f"[*] Password scoring module (Plan 05). Password: {args.password}")
+    """Evaluate password strength and generate plain-language explanations."""
+    cfg = load_config(args.config)
+    scorer = PasswordScorer(config=cfg)
+    res = scorer.score(args.password, include_baselines=True)
+
+    badge_symbols = {
+        "Weak": "[!] WEAK",
+        "Medium": "[*] MEDIUM",
+        "Strong": "[+] STRONG",
+    }
+    badge = badge_symbols.get(res.label, res.label)
+
+    print("\n" + "=" * 65)
+    print(f"   PASSWORD STRENGTH EVALUATION: '{res.password}'")
+    print("=" * 65)
+    print(f"  Rating:             {badge}")
+    print(f"  Estimated Guesses:  10^{res.log10_guesses:.2f} (~{res.estimated_guesses:,.0f} guesses)")
+    print(f"  Model Log-Prob:     {res.logprob:.2f}")
+    print(f"  Structural Pattern: {res.structure}")
+
+    print("\n  Structural Segmentation:")
+    for seg in res.segments:
+        print(f"    - '{seg['text']}' [{seg['kind']}]")
+
+    print("\n  Why is it rated this way? (Plain-Language Explanation):")
+    for r in res.reasons:
+        print(f"    * {r}")
+
+    print("\n  Actionable Recommendations:")
+    for s in res.suggestions:
+        print(f"    > {s}")
+
+    print("\n  Comparative Benchmarking vs. Industry Baselines:")
+    luds = res.baselines.get("luds", {})
+    zxc = res.baselines.get("zxcvbn", {})
+    print(f"    - LUDS Checklist Rule Meter: {luds.get('label', 'N/A')} ({luds.get('score', 'N/A')} criteria passed)")
+    print(f"    - zxcvbn Estimator:          {zxc.get('label', 'N/A')} (Score: {zxc.get('score', 'N/A')}/4, ~10^{zxc.get('log10_guesses', 0):.1f} guesses)")
+    print("=" * 65 + "\n")
 
 
 def cmd_evaluate(args):
-    """Stub for offline evaluation."""
-    print("[*] Offline benchmarking module (Plan 07).")
+    """Run offline benchmarking against held-out test set."""
+    cfg = load_config(args.config)
+
+    # 1. Test set coverage evaluation vs baseline
+    print("[*] Running Test Set Coverage Evaluation (Plan 04)...")
+    run_evaluation_cli(config=cfg, test_limit=args.test_limit)
+
+    if args.all:
+        print("\n[*] Running Meter Benchmarks vs. LUDS & zxcvbn (Plan 07)...")
+        scorer = PasswordScorer(config=cfg)
+        run_meter_benchmark(scorer=scorer, sample_size=args.test_limit)
+
+        print("\n[*] Running 15-Password Case Studies...")
+        run_case_studies(scorer=scorer)
+
+        print("\n[*] Generating Publication Figures...")
+        generate_all_figures()
+
+        print("\n[+] Full Evaluation Complete! All CSVs and Figures generated in reports/")
 
 
 def main():
@@ -185,6 +242,8 @@ def main():
 
     # evaluate
     p_eval = subparsers.add_parser("evaluate", help="Run offline benchmarking against baselines")
+    p_eval.add_argument("--test-limit", type=int, default=5000, help="Number of test passwords to evaluate")
+    p_eval.add_argument("--all", action="store_true", help="Run full benchmark suite including case studies and plots")
     p_eval.set_defaults(func=cmd_evaluate)
 
     args = parser.parse_args()

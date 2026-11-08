@@ -8,6 +8,9 @@ env/
 venv/
 .venv/
 ENV/
+*.egg-info/
+build/
+dist/
 
 # Data and models
 data/raw/*
@@ -22,6 +25,10 @@ models/*
 .coverage
 htmlcov/
 *.log
+
+# Hallmark skill & working directory
+skills/
+.hallmark/
 
 # IDE
 .idea/

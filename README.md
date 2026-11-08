@@ -1,7 +1,7 @@
 # Probabilistic Password Modeling & Explainable Strength Evaluation
 
-**Information Security (IS) Term Project**  
-*FAST-NUCES (Lahore)*
+**Information Security (CS3002) Term Project**  
+*FAST National University of Computer & Emerging Sciences (FAST-NUCES), Lahore*
 
 **Team Members:**
 - Mohib Mansoor (23L-0650)
@@ -12,32 +12,32 @@
 
 ## 1. Project Overview
 
-Conventional password strength meters rely on simple checklist rules (e.g. at least 8 characters, 1 uppercase, 1 number, 1 symbol). Under these static heuristics, predictable passwords like `Password1!` appear "strong", despite being trivial for real-world statistical models and dictionary-based attacks to guess.
+Conventional password strength meters rely on static checklist rules (Length $\ge 8$, Uppercase, Lowercase, Digits, Symbols — LUDS). Under these checklist rules, predictable passwords like `Password1!` appear "Strong", despite being trivial for real-world statistical models and dictionary attacks to crack.
 
-This project implements a statistical password modeling engine trained on public leaked-password research datasets. The system provides two complementary perspectives:
+This project implements a complete statistical password modeling engine trained on public leaked-password research data (RockYou), evaluating password security across two complementary perspectives:
 
-1. **Attacker's View (Offline Evaluation):** Generates candidate password guesses in order of statistical likelihood and measures crack coverage across fixed guess budgets on a strictly held-out test split.
-2. **Defender's View (Explainable Strength Meter):** Estimates how guessable a typed password is, assigning an actionable rating (**Weak / Medium / Strong**) alongside plain-language explanations of predictable human habits (e.g., dictionary words, leetspeak, years, sequences, keyboard patterns).
-
----
-
-## 2. Ethics & Security Guidelines
-
-- **Offline Research Only:** All modeling, training, and testing are conducted offline against public research corpora. No live attacks, network scanning, or unauthorized password testing.
-- **Privacy Preservation:** The interactive strength meter prototype processes queries locally and **never stores, logs, or transmits** user passwords.
-- **Data Hygiene:** Leaked password datasets remain in `data/raw/` and are strictly excluded from version control via `.gitignore`. Only aggregated metrics and summary plots are published.
+1. **Attacker's View (Offline Evaluation):** Measures candidate coverage curves across fixed guess budgets ($10^3$ to $10^7$) on a strictly held-out test split, comparing model anticipation against frequency wordlist baselines.
+2. **Defender's View (Explainable Strength Meter):** Estimates how guessable a typed password is using a Monte Carlo rank estimator, assigning an actionable rating (**Weak / Medium / Strong**) alongside plain-language explanations of predictable human habits.
 
 ---
 
-## 3. Installation
+## 2. Key Results & Findings
 
-Clone the repository and install dependencies in your virtual environment:
+- **The Checklist Fallacy:** Passwords like `Password1!` pass 5/5 criteria on standard LUDS checklist meters and are rated "Strong", but our probabilistic model proves they are guessable within $\approx 375,000$ guesses ($10^{5.6}$) and correctly rates them as **WEAK**.
+- **Antagonist Coverage:** Within an attacker guess budget of $10^7$ guesses, the hybrid statistical model anticipates **49.65%** of novel passwords on a held-out test set, whereas a frequency wordlist baseline covers 0.00%.
+- **Passphrase Security:** Long passphrases like `correct-horse-battery-staple` achieve $> 10^{34}$ guess complexity, proving far more secure than short 8-character mixed strings.
+
+---
+
+## 3. Installation & Setup
+
+Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/Mohib79/IS_Project.git
 cd IS_Project
 
-# Create and activate virtual environment (optional but recommended)
+# Create and activate virtual environment
 python -m venv .venv
 # On Windows:
 .venv\Scripts\activate
@@ -50,31 +50,64 @@ pip install -r requirements.txt
 
 ---
 
-## 4. Dataset Setup & Preparation
+## 4. CLI Usage Guide
 
-Place the research dataset (e.g., `rockyou.txt`) into `data/raw/rockyou.txt`.
+The project provides a unified CLI entry point via `python -m pwlab.cli`:
 
-To run the data cleaning, filtering, and 80/10/10 (train/val/test) split pipeline:
-
+### Step 1: Clean and Partition the Dataset
 ```bash
-# Rapid development run (sampled subset of 500k entries)
-python -m pwlab.cli prepare --sample 500000
+# Rapid development run (100k sample)
+python -m pwlab.cli prepare --sample 100000
 
-# Full dataset run (all cleaned entries)
+# Full dataset run (all cleaned entries from data/raw/rockyou.txt)
 python -m pwlab.cli prepare --full
 ```
 
-The preparation pipeline performs:
-- Text decoding with fallback and newline normalization.
-- Filtering to printable ASCII characters (0x20–0x7E) and length constraints [4, 32].
-- Partitioning into disjoint `train.tsv`, `val.tsv`, and `test.tsv`.
-- Exporting dataset statistics to `reports/results/data_stats.json`.
+### Step 2: Analyze Structural Patterns in Training Data
+```bash
+python -m pwlab.cli analyze-train --limit 20000
+```
+
+### Step 3: Train and Tune the Statistical Model
+```bash
+python -m pwlab.cli train
+```
+*Trains character n-gram Markov models with backoff smoothing across orders 2–5, tunes mixture weight $\lambda$ on the held-out validation slice, and saves artifacts to `models/model.pkl`.*
+
+### Step 4: Evaluate a Password's Strength (With Plain Explanations)
+```bash
+python -m pwlab.cli score "Password1!"
+python -m pwlab.cli score "Summer2026!"
+python -m pwlab.cli score "correct-horse-battery-staple"
+```
+
+### Step 5: Run Full Benchmark Suite & Generate Figures
+```bash
+python -m pwlab.cli evaluate --all --test-limit 5000
+```
+*Generates test set coverage curves, meter benchmark comparisons vs. LUDS and zxcvbn, 15 case studies, and charts in `reports/figures/`.*
 
 ---
 
-## 5. Running Tests
+## 5. Running the Privacy-Preserving Web Application
 
-Run unit tests via `pytest`:
+Start the local web prototype:
+
+```bash
+python web/app.py
+```
+Open your browser at **`http://127.0.0.1:5000`**.
+
+**Privacy Guarantees:**
+- Passwords typed in the browser are processed strictly in volatile RAM.
+- Server access logs for password requests are suppressed.
+- Evaluated via `POST /api/score` (never GET), with `Cache-Control: no-store` headers.
+
+---
+
+## 6. Running Unit Tests
+
+Run the full automated test suite (68 tests):
 
 ```bash
 python -m pytest tests/ -v
@@ -82,13 +115,16 @@ python -m pytest tests/ -v
 
 ---
 
-## 6. Implementation Roadmap
+## 7. Reports & Documentation
 
-- [x] **Plan 01:** Setup, Configuration, Data Cleaning & Partitioning
-- [ ] **Plan 02:** Structural Segmentation (L/D/S) & Pattern Tagging
-- [ ] **Plan 03:** Statistical n-gram Markov & Structure Models
-- [ ] **Plan 04:** Attacker's View: Offline Likelihood-Ordered Evaluation
-- [ ] **Plan 05:** Defender's View: Explainable Strength Meter
-- [ ] **Plan 06:** Privacy-Preserving Web Prototype
-- [ ] **Plan 07:** Empirical Benchmarks (vs. LUDS & zxcvbn) and Security Report
-
+- **Final Term Project Report:** [reports/final_report.md](reports/final_report.md)
+- **Experimental Results:** [reports/results/](reports/results/)
+  - `model_eval.csv`: Test set crack coverage vs. guess budgets.
+  - `meter_comparison.csv`: Unsafe-Strong failure rates across meters.
+  - `case_studies.csv`: 15-password case study comparison table.
+  - `pattern_stats.csv`: Prevalence of human habits in leaked passwords.
+- **Publication Figures:** [reports/figures/](reports/figures/)
+  - `coverage_curve.png`: Offline guessability coverage curve.
+  - `habit_frequencies.png`: Prevalence of predictable human habits.
+  - `top_structures.png`: Top structural grammar templates.
+  - `meter_unsafe_strong_comparison.png`: Unsafe-Strong failure rate comparison.

@@ -1,0 +1,16 @@
+Password,Template,Probabilistic_Meter,Est_Log10_Guesses,LUDS_Checklist,zxcvbn,Primary_Explanation
+123456,D6,Weak,10^1.8,Weak (1/5),Weak (0/4),This is one of the most frequently breached passwords in history and is tested in the first few guesses of any attack.
+password,L8,Weak,10^2.0,Weak (2/5),Weak (0/4),This is one of the most frequently breached passwords in history and is tested in the first few guesses of any attack.
+Password1!,L8D1S1,Weak,10^5.6,Strong (5/5),Weak (1/4),"Contains the common dictionary word or name 'password', drastically reducing effective randomness."
+P@ssw0rd2024!,L1S1L3D1L2D4S1,Medium,10^8.5,Strong (5/5),Medium (2/4),"Uses predictable character substitutions ('@' for 'a', '0' for 'o') based on the dictionary word 'password'. Modern password tools un-leet these automatically."
+Summer2026!,L6D4S1,Medium,10^8.5,Strong (5/5),Medium (2/4),"Combines a common root word ('summer') with a 4-digit calendar year ('2026'), a very common human password habit."
+qwerty123,L6D3,Weak,10^4.8,Medium (3/5),Weak (0/4),Follows an easily guessable horizontal walk ('qwerty') on a QWERTY keyboard.
+1qaz2wsx,D1L3D1L3,Medium,10^8.5,Medium (3/5),Weak (0/4),Follows an easily guessable vertical walk ('1qaz') on a QWERTY keyboard.
+iloveyou99,L8D2,Weak,10^5.7,Medium (3/5),Weak (1/4),"Contains the common dictionary word or name 'loveyou', drastically reducing effective randomness."
+dragon2024,L6D4,Medium,10^8.5,Medium (3/5),Weak (1/4),"Combines a common root word ('dragon') with a 4-digit calendar year ('2024'), a very common human password habit."
+admin2026!,L5D4S1,Medium,10^8.5,Medium (4/5),Strong (3/4),"Combines a common root word ('admin') with a 4-digit calendar year ('2026'), a very common human password habit."
+letmein123,L7D3,Weak,10^5.3,Medium (3/5),Weak (1/4),Follows an easily guessable horizontal walk ('123') on a QWERTY keyboard.
+correct-horse-battery-staple,L7S1L5S1L7S1L6,Strong,10^34.1,Medium (3/5),Strong (4/4),"Contains the common dictionary word or name 'horse', drastically reducing effective randomness."
+blue-sky-flying-clouds,L4S1L3S1L6S1L6,Strong,10^29.7,Medium (3/5),Strong (4/4),"Contains the common dictionary word or name 'blue', drastically reducing effective randomness."
+x7#Qp!vR2m$9,L1D1S1L2S1L2D1L1S1D1,Strong,10^30.3,Strong (5/5),Strong (4/4),Tacks digits ('9') onto the end of the password.
+k9#mQ!vR2x$7pL0w,L1D1S1L2S1L2D1L1S1D1L2D1L1,Strong,10^43.2,Strong (5/5),Strong (4/4),High statistical entropy: character transitions do not follow predictable dictionary or lexical patterns.
