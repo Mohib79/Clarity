@@ -1,4 +1,4 @@
-# Probabilistic Password Modeling & Explainable Strength Evaluation
+#Clarity - Password Modeling & Explainable Strength Evaluation
 
 **Information Security (CS3002) Term Project**  
 ---
