@@ -3,17 +3,22 @@ pwlab command-line interface.
 
 Usage:
     python -m pwlab.cli prepare [--raw PATH] [--sample N] [--max-raw-lines M] [--full] [--config PATH]
+    python -m pwlab.cli analyze "Summer2026!"
+    python -m pwlab.cli analyze-train [--limit N]
     python -m pwlab.cli train
     python -m pwlab.cli score "Password123!"
     python -m pwlab.cli evaluate
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
 from pwlab.config import load_config
 from pwlab.data.prepare import prepare_dataset
+from pwlab.patterns.taggers import analyze
+from pwlab.patterns.stats import compute_pattern_stats
 
 
 def cmd_prepare(args):
@@ -65,6 +70,52 @@ def cmd_prepare(args):
     print(f"    Stats JSON: {paths['stats']}", flush=True)
 
 
+def cmd_analyze(args):
+    """Analyze a single password and show structural segmentation + detected habits."""
+    pw = args.password
+    res = analyze(pw)
+    print(f"\n[+] Password Pattern Analysis: '{pw}'")
+    print(f"    Structural Template: {res.structure}")
+    print(f"    Segments ({len(res.segments)}):")
+    for s in res.segments:
+        extra = f" (case: {s.text})" if s.kind == "L" else ""
+        print(f"      - '{s.text}' [{s.kind}] (span {s.start}:{s.end}){extra}")
+
+    print(f"\n    Detected Habit Tags ({len(res.tags)}):")
+    if not res.tags:
+        print("      (No common predictable habits detected)")
+    for t in res.tags:
+        detail_str = ", ".join(f"{k}={v}" for k, v in t.detail.items())
+        print(f"      - [{t.tag_type.upper()}] '{t.matched_text}' (span {t.span[0]}:{t.span[1]}) -> {detail_str}")
+    print()
+
+
+def cmd_analyze_train(args):
+    """Compute aggregate pattern and structure frequencies across training data."""
+    cfg = load_config(args.config)
+    train_file = args.train or cfg.paths.train_data
+
+    print(f"[*] Analyzing patterns across training dataset: {train_file}")
+    res = compute_pattern_stats(
+        train_path=train_file,
+        output_csv=args.output or "reports/results/pattern_stats.csv",
+        max_passwords=args.limit,
+    )
+
+    print("\n[+] Pattern Analysis Complete!")
+    print(f"    Evaluated passwords: {res['total_evaluated']:,}")
+    print(f"    Output CSV:          {res['output_path']}")
+    print("\n    Top 5 Structural Templates:")
+    for struct, cnt in res["top_structures"][:5]:
+        pct = (cnt / res["total_weight"]) * 100
+        print(f"      - {struct:<10} {cnt:,} ({pct:.1f}%)")
+
+    print("\n    Most Common Human Habits:")
+    for habit, cnt in list(res["tag_prevalence"].items())[:6]:
+        pct = (cnt / res["total_weight"]) * 100
+        print(f"      - {habit:<25} {cnt:,} ({pct:.1f}%)")
+
+
 def cmd_train(args):
     """Stub for model training."""
     print("[*] Model training module (Plan 03). Use 'python -m pwlab.cli prepare' first.")
@@ -97,6 +148,18 @@ def main():
     p_prepare.add_argument("--full", action="store_true", help="Process the full dataset without sampling")
     p_prepare.add_argument("--seed", type=int, default=None, help="Random seed for splitting")
     p_prepare.set_defaults(func=cmd_prepare)
+
+    # analyze
+    p_analyze = subparsers.add_parser("analyze", help="Analyze structural habits of a given password")
+    p_analyze.add_argument("password", type=str, help="Password string to analyze")
+    p_analyze.set_defaults(func=cmd_analyze)
+
+    # analyze-train
+    p_atrain = subparsers.add_parser("analyze-train", help="Compute corpus-wide pattern statistics")
+    p_atrain.add_argument("--train", default=None, help="Path to train.tsv (defaults to config)")
+    p_atrain.add_argument("--limit", type=int, default=50000, help="Max passwords to analyze")
+    p_atrain.add_argument("--output", default="reports/results/pattern_stats.csv", help="Output CSV path")
+    p_atrain.set_defaults(func=cmd_analyze_train)
 
     # train
     p_train = subparsers.add_parser("train", help="Train the statistical n-gram and structure models")
