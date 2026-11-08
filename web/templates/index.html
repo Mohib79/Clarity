@@ -3,100 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Probabilistic Password Strength Meter: Explainable dual-perspective password security analyzer evaluating offensive attacker guessability and defensive structural resilience.">
-  <title>Probabilistic Password Strength Meter · Dual-Perspective Evaluation</title>
+  <meta name="description" content="Clarity: Probabilistic Password Strength Meter. A guided dual-perspective evaluation of password predictability and search effort.">
+  <title>Clarity · Probabilistic Password Strength Meter</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Host+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-/* Hallmark · shape: app screen · genre: modern-minimal · theme: Console (by request)
- * nav: edge-aligned · signature: asymmetric dual-perspective security analyzer · states: active, disabled, focus-visible · console: graphite
- * axes: dark/grotesk-sans/chromatic-amber · posture: restrained · contrast: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · weakest: S5, asymmetric console layout replaces symmetric twin cards */
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Clarity (by request)
+ * nav: guided stepper · signature: 4-step progressive disclosure security workflow · states: active, disabled, focus-visible · console: light-slate
+ * axes: light/neo-grotesk/cobalt · posture: restrained · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · weakest: S5, 4-step guided progression replaces single-page stack */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Scale */
+  /* Spacing Scale */
   --space-3xs: 2px;
   --space-2xs: 4px;
   --space-xs: 8px;
   --space-sm: 12px;
   --space-md: 16px;
   --space-lg: 24px;
-  --space-xl: 36px;
-  --space-2xl: 52px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
 
-  /* Typography */
-  --text-xs: 0.75rem;
-  --text-sm: 0.84rem;
-  --text-base: 0.94rem;
+  /* Typography Scale */
+  --text-xs: 0.78rem;
+  --text-sm: 0.88rem;
+  --text-base: 0.95rem;
   --text-md: 1rem;
   --text-lg: 1.15rem;
-  --text-xl: 1.4rem;
-  --text-2xl: 1.85rem;
-  --text-display: 2.2rem;
+  --text-xl: 1.35rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.15rem;
+  --text-hero: 2.65rem;
 
   --font-display: "Host Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-body: var(--font-display);
-  --font-outlier: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-outlier: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Console Theme Palette (Graphite ground, Pale ink, Amber accent, Cool instrument) */
-  --color-paper: oklch(17% 0.008 250);
-  --color-paper-2: oklch(21% 0.009 250);
-  --color-paper-3: oklch(13.5% 0.007 250);
-  --color-ink: oklch(95% 0.005 250);
-  --color-ink-2: oklch(83% 0.008 250);
-  --color-muted: oklch(71% 0.01 250);
-  --color-rule: oklch(31% 0.01 250);
-  --color-rule-2: oklch(42% 0.012 250);
+  /* Palette - Light Precision Slate Canvas */
+  --canvas-bg: oklch(97.5% 0.005 245);
+  --surface-card: oklch(100% 0 0);
+  --surface-card-subtle: oklch(98.8% 0.003 245);
+  --surface-dark: oklch(20% 0.038 255);
+  --navy-card-foreground: oklch(97% 0.005 255);
+  --surface-dark-muted: oklch(82% 0.015 255);
+  --surface-dark-subtle: oklch(27% 0.04 255);
 
-  /* Accents & States */
-  --color-accent: oklch(82% 0.15 80);
-  --color-accent-ink: oklch(18% 0.04 75);
-  --color-accent-soft: oklch(29% 0.05 80);
-  --color-focus: oklch(82% 0.15 80);
-  --color-cool: oklch(77% 0.12 245);
-  --color-cool-soft: oklch(27% 0.05 245);
-  --color-cool-border: oklch(38% 0.07 245);
+  --border-subtle: oklch(91.5% 0.006 245);
+  --border-strong: oklch(84% 0.012 245);
+  --border-focus: oklch(49% 0.23 255);
 
-  /* Status */
-  --color-ok: oklch(76% 0.15 150);
-  --color-ok-soft: oklch(24.5% 0.03 150);
-  --color-bad: oklch(70% 0.17 25);
-  --color-bad-soft: oklch(24.5% 0.035 25);
-  --color-medium: oklch(78% 0.14 70);
-  --color-medium-soft: oklch(26% 0.04 70);
+  --text-primary: oklch(18% 0.015 255);
+  --text-secondary: oklch(38% 0.02 255);
+  --text-muted: oklch(48% 0.022 255);
+  --text-subtle: oklch(58% 0.018 245);
 
-  /* Aliases for JavaScript color mutations */
-  --weak: var(--color-bad);
-  --weak-bg: var(--color-bad-soft);
-  --medium: var(--color-medium);
-  --medium-bg: var(--color-medium-soft);
-  --strong: var(--color-ok);
-  --strong-bg: var(--color-ok-soft);
-  --attacker: var(--color-bad);
-  --defender: var(--color-ok);
+  /* Primary Cobalt Accent (Tuned for >4.5:1 contrast against white) */
+  --primary-blue: oklch(49% 0.23 255);
+  --primary-blue-hover: oklch(43% 0.23 255);
+  --primary-blue-active: oklch(38% 0.23 255);
+  --primary-blue-soft: oklch(95.5% 0.025 255);
+  --primary-blue-border: oklch(84% 0.08 255);
+  --primary-blue-label: oklch(99% 0.002 255);
 
-  /* Character Segment Class Tokens */
-  --seg-l-ink: oklch(85% 0.10 245);
-  --seg-l-bg: oklch(24% 0.04 245);
-  --seg-l-border: oklch(38% 0.06 245);
-  --seg-d-ink: oklch(86% 0.12 80);
-  --seg-d-bg: oklch(25% 0.04 80);
-  --seg-d-border: oklch(39% 0.06 80);
-  --seg-s-ink: oklch(84% 0.12 320);
-  --seg-s-bg: oklch(24% 0.04 320);
-  --seg-s-border: oklch(38% 0.06 320);
+  /* Status Colors (Tuned for >= 4.5:1 contrast against soft backgrounds) */
+  --status-weak-text: oklch(50% 0.20 40);
+  --status-weak-bg: oklch(96.5% 0.03 55);
+  --status-weak-border: oklch(87% 0.08 55);
+
+  --status-medium-text: oklch(48% 0.17 75);
+  --status-medium-bg: oklch(97% 0.03 85);
+  --status-medium-border: oklch(88% 0.08 85);
+
+  --status-strong-text: oklch(45% 0.18 150);
+  --status-strong-bg: oklch(96.5% 0.03 150);
+  --status-strong-border: oklch(86% 0.08 150);
+
+  /* Aliases for JS styling compatibility */
+  --weak: var(--status-weak-text);
+  --weak-bg: var(--status-weak-bg);
+  --medium: var(--status-medium-text);
+  --medium-bg: var(--status-medium-bg);
+  --strong: var(--status-strong-text);
+  --strong-bg: var(--status-strong-bg);
+
+  /* Character Segment Tokens */
+  --seg-l-text: oklch(44% 0.16 255);
+  --seg-l-bg: oklch(95.5% 0.025 255);
+  --seg-l-border: oklch(86% 0.08 255);
+
+  --seg-d-text: oklch(48% 0.18 50);
+  --seg-d-bg: oklch(96.5% 0.03 55);
+  --seg-d-border: oklch(87% 0.08 55);
+
+  --seg-s-text: oklch(46% 0.18 310);
+  --seg-s-bg: oklch(96.5% 0.025 310);
+  --seg-s-border: oklch(87% 0.08 310);
 
   /* Radii & Rules */
-  --radius-card: 10px;
-  --radius-pill: 6px;
-  --radius-subtle: 4px;
+  --radius-card: 16px;
+  --radius-panel: 12px;
+  --radius-pill: 9999px;
+  --radius-btn: 10px;
+  --radius-input: 10px;
+  --radius-subtle: 6px;
   --rule-hair: 1px;
-  --container: 1140px;
-  --tracking-display: -0.025em;
-  --display-weight: 500;
+
+  /* Shadows declared as tokens */
+  --shadow-subtle: 0 1px 3px oklch(0% 0 0 / 0.05);
+  --shadow-card: 0 4px 12px oklch(0% 0 0 / 0.02);
+
+  --container: 1160px;
   --dur-short: 180ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -112,374 +131,943 @@ html, body {
 }
 
 html {
-  scrollbar-color: var(--color-rule-2) var(--color-paper);
+  scrollbar-color: var(--border-strong) var(--canvas-bg);
 }
 
 body {
-  background-color: var(--color-paper);
-  color: var(--color-ink);
+  background-color: var(--canvas-bg);
+  color: var(--text-primary);
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  caret-color: var(--color-accent);
-  padding: var(--space-xl) var(--space-md);
+  caret-color: var(--primary-blue);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-accent) 25%, transparent);
+  background: color-mix(in oklab, var(--primary-blue) 20%, transparent);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-focus);
+  outline: 2px solid var(--primary-blue);
   outline-offset: 2px;
 }
 
 h1, h2, h3 {
   font-family: var(--font-display);
-  font-weight: var(--display-weight);
-  letter-spacing: var(--tracking-display);
+  font-weight: 600;
   line-height: 1.15;
   overflow-wrap: break-word;
   min-width: 0;
   text-wrap: balance;
+  color: var(--text-primary);
 }
 
 h1 {
-  font-size: var(--text-2xl);
-  color: var(--color-ink);
+  font-size: var(--text-hero);
+  letter-spacing: -0.02em;
 }
 
 h2 {
-  font-size: var(--text-lg);
-  color: var(--color-ink);
+  font-size: var(--text-2xl);
+  letter-spacing: -0.015em;
 }
 
 h3 {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  font-weight: 500;
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
 }
 
 p {
-  color: var(--color-muted);
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
-/* Master Container */
-.app-container {
+/* Master App Container */
+.app-shell {
+  width: 100%;
   max-width: var(--container);
   margin-inline: auto;
+  padding: var(--space-lg) var(--space-md);
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-xl);
+  flex: 1;
 }
 
-/* Top Console Masthead */
-.masthead {
+/* Top Global Navigation Bar */
+.clarity-header {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
   padding-bottom: var(--space-md);
-  border-bottom: var(--rule-hair) solid var(--color-rule);
 }
 
-.masthead-identity {
+.brand-anchor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.brand-icon-wrap {
+  width: 34px;
+  height: 34px;
+  background-color: var(--text-primary);
+  color: var(--surface-card);
+  border-radius: var(--radius-btn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-icon-wrap svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+}
+
+.brand-wordmark {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.brand-separator {
+  width: var(--rule-hair);
+  height: 16px;
+  background-color: var(--border-strong);
+  margin-inline: var(--space-2xs);
+}
+
+.brand-tagline {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.meta-link {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.meta-link:hover {
+  color: var(--primary-blue);
+}
+
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2xs) var(--space-sm);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--text-subtle);
+}
+
+/* Stepper Navigation */
+.stepper-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2xs);
+  gap: var(--space-2xs);
+}
+
+.step-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+  text-decoration: none;
+}
+
+.step-tab:hover {
+  color: var(--text-primary);
+  background-color: var(--surface-card-subtle);
+}
+
+.step-tab.is-active {
+  background-color: var(--surface-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-subtle);
+}
+
+.step-tab.is-completed {
+  color: var(--text-secondary);
+}
+
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: var(--text-xs);
+  font-family: var(--font-outlier);
+  font-weight: 600;
+  background-color: var(--canvas-bg);
+  color: var(--text-secondary);
+}
+
+.step-tab.is-active .step-badge {
+  background-color: var(--primary-blue);
+  color: var(--primary-blue-label);
+}
+
+.step-tab.is-completed .step-badge {
+  background-color: var(--primary-blue-soft);
+  color: var(--primary-blue);
+}
+
+/* Step Header Elements */
+.step-lead-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.step-heading {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.step-subheading {
+  font-size: var(--text-md);
+  color: var(--text-muted);
+}
+
+/* Persistent Sample Password Strip (Steps 2-4) */
+.sample-password-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  padding: var(--space-sm) var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.sample-meta-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.sample-key-icon {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-muted);
+  fill: none;
+}
+
+.sample-caption {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.sample-val-text {
+  font-family: var(--font-outlier);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sample-len-pill {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  background-color: var(--canvas-bg);
+  padding: var(--space-3xs) var(--space-xs);
+  border-radius: var(--radius-subtle);
+  font-family: var(--font-outlier);
+}
+
+.change-pw-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--text-xs);
+  color: var(--primary-blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.change-pw-link:hover {
+  text-decoration: underline;
+}
+
+/* STEP 1: PASSWORD ENTRY STAGE */
+.entry-stage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: var(--space-2xl);
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .entry-stage-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+}
+
+.entry-lead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.entry-heading {
+  font-size: var(--text-hero);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.entry-desc {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  line-height: 1.55;
+  max-width: 44ch;
+}
+
+.perspective-feature-box {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding-top: var(--space-xs);
+}
+
+.feature-icon-bubble {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-btn);
+  background-color: var(--primary-blue-soft);
+  color: var(--primary-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.feature-icon-bubble svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.feature-text-group {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
 }
 
-.masthead-sub {
+.feature-title {
   font-size: var(--text-sm);
-  color: var(--color-muted);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.privacy-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  background-color: var(--color-paper-2);
-  border: var(--rule-hair) solid var(--color-rule-2);
-  border-radius: var(--radius-pill);
-  padding: var(--space-2xs) var(--space-sm);
+.feature-desc {
   font-size: var(--text-xs);
-  color: var(--color-ink-2);
+  color: var(--text-muted);
 }
 
-.privacy-indicator svg {
-  width: 14px;
-  height: 14px;
-  fill: none;
-  stroke: var(--color-ok);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Control Station / Input Surface */
-.control-station {
-  background-color: var(--color-paper-2);
-  color: var(--color-ink);
-  border: var(--rule-hair) solid var(--color-rule);
+/* Password Entry Interactive Box */
+.entry-card-surface {
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
   border-radius: var(--radius-card);
-  padding: var(--space-lg);
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-lg);
+  box-shadow: var(--shadow-card);
 }
 
-.input-chassis {
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.card-title-text {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.input-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.field-label {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-box {
+.password-text-field {
   width: 100%;
   padding: var(--space-md) 4.5rem var(--space-md) var(--space-md);
-  background-color: var(--color-paper-3);
-  color: var(--color-ink);
-  border: var(--rule-hair) solid var(--color-rule-2);
-  border-radius: var(--radius-pill);
+  background-color: var(--surface-card);
+  color: var(--text-primary);
+  border: var(--rule-hair) solid var(--border-strong);
+  border-radius: var(--radius-input);
   font-family: var(--font-outlier);
   font-size: var(--text-lg);
   font-variant-numeric: tabular-nums;
-  transition: border-color var(--dur-short) var(--ease-out);
+  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out);
 }
 
-.input-box:focus {
+.password-text-field:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary-blue) 12%, transparent);
 }
 
-.input-box:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.toggle-visibility {
+.toggle-visibility-btn {
   position: absolute;
   right: var(--space-sm);
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: var(--color-paper-2);
-  color: var(--color-muted);
-  border: var(--rule-hair) solid var(--color-rule);
-  border-radius: var(--radius-subtle);
-  padding: var(--space-2xs) var(--space-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
   font-size: var(--text-xs);
   font-family: var(--font-body);
   cursor: pointer;
-  transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+  padding: var(--space-2xs);
+  transition: color var(--dur-short) var(--ease-out);
 }
 
-.toggle-visibility:hover {
-  color: var(--color-ink);
-  border-color: var(--color-rule-2);
+.toggle-visibility-btn:hover {
+  color: var(--text-primary);
 }
 
-.toggle-visibility:active {
-  transform: translateY(calc(-50% + 1px));
+.toggle-visibility-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
 }
 
-.toggle-visibility:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.input-caption-text {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
 }
 
-/* Benchmarking Preset Bar */
-.presets-shelf {
+/* Preset Chips */
+.presets-section {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-xs);
 }
 
-.presets-label {
+.presets-tag-label {
   font-size: var(--text-xs);
-  color: var(--color-muted);
-  margin-right: var(--space-2xs);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.presets-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
 }
 
 .example-btn {
-  background-color: var(--color-paper-3);
-  color: var(--color-ink-2);
-  border: var(--rule-hair) solid var(--color-rule);
-  border-radius: var(--radius-pill);
+  background-color: var(--surface-card-subtle);
+  color: var(--text-secondary);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-subtle);
   padding: var(--space-2xs) var(--space-sm);
   font-size: var(--text-xs);
   font-family: var(--font-outlier);
   cursor: pointer;
-  transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
 }
 
 .example-btn:hover {
-  background-color: var(--color-paper);
-  color: var(--color-accent);
-  border-color: var(--color-accent);
+  background-color: var(--surface-card);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
 }
 
-.example-btn:active {
+.example-btn.is-active {
+  background-color: var(--primary-blue-soft);
+  border-color: var(--primary-blue-border);
+  color: var(--primary-blue);
+  font-weight: 600;
+}
+
+.example-btn:active, .primary-cta-btn:active, .secondary-nav-btn:active, .step-next-btn:active {
   transform: translateY(1px);
 }
 
-.example-btn:disabled {
+.example-btn:disabled, .primary-cta-btn:disabled, .secondary-nav-btn:disabled, .step-next-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-/* Asymmetric Dual Perspective Arena */
-.arena-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  gap: var(--space-md);
-  align-items: start;
+/* Primary Action Button */
+.cta-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  align-items: center;
 }
 
-@media (max-width: 860px) {
-  .arena-grid {
+.primary-cta-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background-color: var(--primary-blue);
+  color: var(--primary-blue-label);
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--text-md);
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out);
+}
+
+.primary-cta-btn:hover {
+  background-color: var(--primary-blue-hover);
+}
+
+.cta-subtext {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Step 1 Bottom 3 Preview Tiles */
+.step-preview-tray {
+  margin-top: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.tray-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.tray-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tray-sub {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.preview-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+@media (max-width: 780px) {
+  .preview-cards-grid {
     grid-template-columns: 1fr;
   }
 }
 
-/* Perspective 1: Defender Dossier (Inspection Document) */
-.defender-dossier {
-  background-color: var(--color-paper-2);
-  color: var(--color-ink);
-  border: var(--rule-hair) solid var(--color-rule);
+.preview-tile-surface {
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
   border-radius: var(--radius-card);
-  overflow: hidden;
+  padding: var(--space-lg);
   display: flex;
   flex-direction: column;
+  gap: var(--space-sm);
 }
 
-.dossier-mast {
+.preview-top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-sm);
-  padding: var(--space-md) var(--space-lg);
-  border-bottom: var(--rule-hair) solid var(--color-rule);
-  background-color: var(--color-paper-2);
-  color: var(--color-ink);
 }
 
-.dossier-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.icon-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-paper-3);
-  border: var(--rule-hair) solid var(--color-rule);
-}
-
-.icon-badge svg {
-  width: 16px;
-  height: 16px;
+.tile-icon {
+  width: 18px;
+  height: 18px;
   fill: none;
-  stroke: var(--color-ok);
+  stroke: var(--primary-blue);
   stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
-.icon-badge.attacker-badge svg {
-  stroke: var(--color-bad);
-}
-
-.dossier-heading {
-  font-size: var(--text-md);
+.tile-label-tag {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
   font-weight: 500;
-  color: var(--color-ink);
 }
 
-.rating-pill {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  padding: var(--space-2xs) var(--space-md);
-  border-radius: var(--radius-pill);
-  border-width: var(--rule-hair);
-  border-style: solid;
+.preview-tile-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.rating-weak {
-  background-color: var(--color-bad-soft);
-  color: var(--color-bad);
-  border-color: var(--color-bad);
+.preview-tile-desc {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: 1.45;
 }
 
-.rating-medium {
-  background-color: var(--color-medium-soft);
-  color: var(--color-medium);
-  border-color: var(--color-medium);
+/* STEP 2: DEFENDER'S VIEW */
+.dual-card-arena {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: stretch;
+  margin-bottom: var(--space-lg);
 }
 
-.rating-strong {
-  background-color: var(--color-ok-soft);
-  color: var(--color-ok);
-  border-color: var(--color-ok);
+@media (max-width: 860px) {
+  .dual-card-arena {
+    grid-template-columns: 1fr;
+  }
 }
 
-.dossier-body {
-  padding: var(--space-lg);
+.assessment-surface {
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
 }
 
-.dossier-section {
+.assessment-top-bar {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
 }
 
-.section-label {
+.surface-title-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.surface-title-badge svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--primary-blue);
+  stroke-width: 2;
+}
+
+.status-verdict-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-3xs) var(--space-sm);
+  border-radius: var(--radius-pill);
   font-size: var(--text-xs);
-  color: var(--color-muted);
+  font-weight: 600;
+  border-width: var(--rule-hair);
+  border-style: solid;
+}
+
+.verdict-weak {
+  background-color: var(--status-weak-bg);
+  color: var(--status-weak-text);
+  border-color: var(--status-weak-border);
+}
+
+.verdict-medium {
+  background-color: var(--status-medium-bg);
+  color: var(--status-medium-text);
+  border-color: var(--status-medium-border);
+}
+
+.verdict-strong {
+  background-color: var(--status-strong-bg);
+  color: var(--status-strong-text);
+  border-color: var(--status-strong-border);
+}
+
+.assessment-headline {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+/* Predictability Bar */
+.predictability-gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.gauge-track {
+  width: 100%;
+  height: 6px;
+  background-color: var(--canvas-bg);
+  border-radius: var(--radius-pill);
+  position: relative;
+  overflow: hidden;
+}
+
+.gauge-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 25%;
+  background-color: var(--status-weak-text);
+  border-radius: var(--radius-pill);
+}
+
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* Bullet list of reasons */
+.flaw-reasons-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.flaw-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.dash-symbol {
+  color: var(--status-weak-text);
+  font-weight: 700;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.flaw-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.flaw-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.flaw-text {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* Dark Advice Card */
+.advice-dark-surface {
+  background-color: var(--surface-dark);
+  color: var(--navy-card-foreground);
+  border-radius: var(--radius-card);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.advice-top-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--primary-blue-border);
   font-weight: 500;
 }
 
-.template-strip {
+.advice-top-bar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.advice-headline {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--navy-card-foreground);
+}
+
+.advice-checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.advice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.check-glyph-icon {
+  width: 18px;
+  height: 18px;
+  stroke: var(--primary-blue-border);
+  fill: none;
+  stroke-width: 2.2;
+  flex-shrink: 0;
+  margin-top: var(--space-3xs);
+}
+
+.advice-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.advice-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--navy-card-foreground);
+}
+
+.advice-text {
+  font-size: var(--text-xs);
+  color: var(--surface-dark-muted);
+  line-height: 1.45;
+}
+
+/* Structural Composition Strip */
+.composition-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.composition-left {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
 }
 
-.template-code {
+.composition-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.template-code-box {
   font-family: var(--font-outlier);
-  font-size: var(--text-sm);
-  color: var(--color-accent);
-  background-color: var(--color-paper-3);
-  border: var(--rule-hair) solid var(--color-rule);
-  padding: var(--space-2xs) var(--space-xs);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--canvas-bg);
+  padding: var(--space-3xs) var(--space-xs);
   border-radius: var(--radius-subtle);
 }
 
-.segments-container {
+.segments-cluster {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
-  margin-top: var(--space-2xs);
 }
 
 .seg-pill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2xs);
-  padding: var(--space-2xs) var(--space-xs);
+  padding: var(--space-3xs) var(--space-xs);
   border-radius: var(--radius-subtle);
   font-family: var(--font-outlier);
   font-size: var(--text-xs);
@@ -490,282 +1078,449 @@ p {
 .seg-L {
   background-color: var(--seg-l-bg);
   border-color: var(--seg-l-border);
-  color: var(--seg-l-ink);
+  color: var(--seg-l-text);
 }
 
 .seg-D {
   background-color: var(--seg-d-bg);
   border-color: var(--seg-d-border);
-  color: var(--seg-d-ink);
+  color: var(--seg-d-text);
 }
 
 .seg-S {
   background-color: var(--seg-s-bg);
   border-color: var(--seg-s-border);
-  color: var(--seg-s-ink);
+  color: var(--seg-s-text);
 }
 
 .seg-tag {
   font-size: var(--text-xs);
   opacity: 0.8;
-  margin-left: var(--space-3xs);
 }
 
-.reasons-list, .guidance-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.reasons-list li {
-  position: relative;
-  padding-left: var(--space-lg);
-  font-size: var(--text-sm);
-  color: var(--color-ink-2);
-  line-height: 1.45;
-}
-
-.reasons-list li::before {
-  content: "—";
-  position: absolute;
-  left: 0;
-  color: var(--color-bad);
-  font-weight: 700;
-}
-
-.guidance-list li {
-  position: relative;
-  padding-left: var(--space-lg);
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  line-height: 1.45;
-}
-
-.guidance-list li::before {
-  content: "›";
-  position: absolute;
-  left: var(--space-3xs);
-  color: var(--color-ok);
-  font-weight: 700;
-}
-
-/* Perspective 2: Attacker Telemetry Rail (Quantitative Stream) */
-.attacker-rail {
-  background-color: var(--color-paper-3);
-  color: var(--color-ink);
-  border: var(--rule-hair) solid var(--color-rule);
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.rail-mast {
+/* Collapsible Accordion Bar */
+.model-accordion-bar {
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  padding: var(--space-sm) var(--space-lg);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-sm);
-  padding: var(--space-md) var(--space-lg);
-  border-bottom: var(--rule-hair) solid var(--color-rule);
-  background-color: var(--color-paper-3);
-  color: var(--color-ink);
-}
-
-.rail-telemetry-tag {
   font-size: var(--text-xs);
-  color: var(--color-bad);
-  font-family: var(--font-outlier);
-  background-color: var(--color-bad-soft);
-  border: var(--rule-hair) solid var(--color-bad);
-  padding: var(--space-3xs) var(--space-xs);
-  border-radius: var(--radius-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-bottom: var(--space-lg);
 }
 
-.rail-body {
-  padding: var(--space-lg);
+.accordion-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.accordion-sub-meta {
+  color: var(--text-muted);
+  font-family: var(--font-outlier);
+}
+
+/* STEP 3: ATTACKER'S VIEW */
+.search-budget-card {
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
 }
 
-.guess-gauge {
-  background-color: var(--color-paper-2);
-  color: var(--color-ink);
-  border: var(--rule-hair) solid var(--color-rule);
-  border-radius: var(--radius-pill);
-  padding: var(--space-md);
+.budget-top-row {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-}
-
-.guess-gauge-metric {
-  font-family: var(--font-outlier);
-  font-size: var(--text-display);
-  font-weight: 500;
-  line-height: 1;
-  color: var(--color-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-.guess-gauge-sub {
-  font-size: var(--text-xs);
-  color: var(--color-muted);
-}
-
-.crack-times-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-}
-
-.crack-row {
-  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: baseline;
   gap: var(--space-sm);
-  padding: var(--space-xs) 0;
-  border-bottom: var(--rule-hair) solid var(--color-rule);
-  font-size: var(--text-xs);
 }
 
-.crack-tier {
-  color: var(--color-muted);
+.target-icon {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--primary-blue);
+  stroke-width: 2;
 }
 
-.crack-val {
+.exponent-large {
   font-family: var(--font-outlier);
-  color: var(--color-ink-2);
-  font-weight: 500;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+  font-size: 3.4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
 }
 
-.attack-list {
-  list-style: none;
+.guess-count-caption {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.effort-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-3xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  background-color: var(--status-weak-bg);
+  color: var(--status-weak-text);
+  border: var(--rule-hair) solid var(--status-weak-border);
+  align-self: flex-start;
+}
+
+.divider-hair {
+  height: var(--rule-hair);
+  background-color: var(--border-subtle);
+}
+
+.attacker-why-block {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
 }
 
-.attack-list li {
-  position: relative;
-  padding-left: var(--space-md);
+.attacker-why-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.transformation-breadcrumb-box {
+  background-color: var(--canvas-bg);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-subtle);
+  padding: var(--space-xs) var(--space-sm);
+  font-family: var(--font-outlier);
   font-size: var(--text-xs);
-  color: var(--color-ink-2);
-  line-height: 1.45;
+  color: var(--text-secondary);
 }
 
-.attack-list li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: var(--color-bad);
+/* Speed Scenarios Surface */
+.scenarios-surface {
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
-.stat-strip {
+.scenarios-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.scenarios-heading {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.scenario-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.scenario-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  background-color: var(--surface-card);
+  transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+}
+
+.scenario-panel.is-highlighted {
+  background-color: var(--primary-blue-soft);
+  border-color: var(--primary-blue-border);
+}
+
+.scenario-left-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.scenario-icon {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.scenario-panel.is-highlighted .scenario-icon {
+  stroke: var(--primary-blue);
+}
+
+.scenario-text-col {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
-  background-color: var(--color-paper-2);
-  color: var(--color-ink);
-  border: var(--rule-hair) solid var(--color-rule);
-  border-radius: var(--radius-subtle);
-  padding: var(--space-xs) var(--space-sm);
 }
 
-.stat-strip-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.scenario-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.scenario-desc {
   font-size: var(--text-xs);
+  color: var(--text-muted);
 }
 
-.stat-strip-label {
-  color: var(--color-muted);
-}
-
-.stat-strip-val {
+.scenario-rate {
   font-family: var(--font-outlier);
-  color: var(--color-ink);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Comparative Benchmark Station (Flat hairline seam matrix) */
-.benchmark-station {
-  background-color: var(--color-paper-2);
-  color: var(--color-ink);
-  border: var(--rule-hair) solid var(--color-rule);
-  border-radius: var(--radius-card);
-  overflow: hidden;
-}
-
-.benchmark-mast {
-  padding: var(--space-md) var(--space-lg);
-  border-bottom: var(--rule-hair) solid var(--color-rule);
-  background-color: var(--color-paper-2);
-  color: var(--color-ink);
-}
-
-.benchmark-mast h2 {
-  font-size: var(--text-md);
-  margin-bottom: var(--space-3xs);
-}
-
-.benchmark-mast p {
   font-size: var(--text-xs);
-  color: var(--color-muted);
+  color: var(--text-secondary);
 }
 
-.benchmark-matrix {
+.scenario-duration {
+  font-family: var(--font-outlier);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.scenario-panel.is-highlighted .scenario-duration {
+  color: var(--primary-blue);
+}
+
+.scenario-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-top: var(--space-2xs);
+}
+
+/* STEP 4: BASELINE VERIFICATION */
+.comparison-trio-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--rule-hair);
-  background-color: var(--color-rule);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
 }
 
-@media (max-width: 720px) {
-  .benchmark-matrix {
+@media (max-width: 860px) {
+  .comparison-trio-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.benchmark-cell {
-  background-color: var(--color-paper-2);
-  color: var(--color-ink);
-  padding: var(--space-md) var(--space-lg);
+.benchmark-card {
+  background-color: var(--surface-card);
+  border: var(--rule-hair) solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xs);
+  gap: var(--space-md);
 }
 
-.benchmark-cell-label {
+.benchmark-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.benchmark-type-tag {
   font-size: var(--text-xs);
-  color: var(--color-muted);
+  color: var(--text-muted);
   font-weight: 500;
 }
 
-.benchmark-verdict {
-  font-size: var(--text-lg);
+.benchmark-system-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.benchmark-verdict-large {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.benchmark-subline {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.benchmark-stat-reading {
+  font-size: var(--text-base);
+  font-weight: 700;
+  font-family: var(--font-outlier);
+  color: var(--text-primary);
+}
+
+.benchmark-explanation-text {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* Key Insight Callout Banner */
+.insight-callout-banner {
+  background-color: var(--primary-blue-soft);
+  border: var(--rule-hair) solid var(--primary-blue-border);
+  border-radius: var(--radius-panel);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+@media (max-width: 760px) {
+  .insight-callout-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.callout-body-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.callout-bulb-icon {
+  width: 22px;
+  height: 22px;
+  stroke: var(--primary-blue);
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+  margin-top: var(--space-3xs);
+}
+
+.callout-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.callout-title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.callout-desc {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.callout-verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-3xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  background-color: var(--status-weak-bg);
+  color: var(--status-weak-text);
+  border: var(--rule-hair) solid var(--status-weak-border);
+  white-space: nowrap;
+}
+
+/* Step Footer Navigation Bar */
+.step-footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-top: var(--space-sm);
+}
+
+.step-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: var(--space-xs);
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.step-back-btn:hover {
+  color: var(--text-primary);
+}
+
+.step-next-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.step-next-caption {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.step-next-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background-color: var(--primary-blue);
+  color: var(--primary-blue-label);
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--text-sm);
   font-weight: 600;
   font-family: var(--font-body);
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out);
 }
 
-.benchmark-detail {
-  font-size: var(--text-xs);
-  color: var(--color-muted);
-  font-family: var(--font-outlier);
+.step-next-btn:hover {
+  background-color: var(--primary-blue-hover);
 }
 
-/* Minimal System Notice (Replaces former student names/course footer) */
-.system-footer {
-  text-align: center;
+/* Master Bottom Footer */
+.clarity-footer {
+  border-top: var(--rule-hair) solid var(--border-subtle);
+  padding-top: var(--space-md);
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: var(--text-xs);
-  color: var(--color-muted);
-  padding: var(--space-md) 0 var(--space-sm) 0;
+  color: var(--text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -778,225 +1533,665 @@ p {
   </style>
 </head>
 <body>
-  <div class="app-container">
-    
-    <!-- TOP MASTHEAD -->
-    <header class="masthead">
-      <div class="masthead-identity">
-        <h1>Probabilistic Password Strength Meter</h1>
-        <p class="masthead-sub">Dual-Perspective Evaluation: Attacker Search Modeling vs. Explainable Defender Meter</p>
-      </div>
-      <div class="privacy-indicator">
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        <span>Volatile memory evaluation · Zero persistence</span>
+  <div class="app-shell">
+
+    <!-- GLOBAL HEADER -->
+    <header class="clarity-header">
+      <a href="#" class="brand-anchor" id="logoLink">
+        <div class="brand-icon-wrap">
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <span class="brand-wordmark">Clarity</span>
+        <span class="brand-separator" aria-hidden="true"></span>
+        <span class="brand-tagline">Probabilistic password strength meter</span>
+      </a>
+
+      <div class="header-meta">
+        <a href="#howItWorks" class="meta-link" id="howItWorksBtn">How it works</a>
+        <div class="pill-badge">
+          <span class="pill-dot" aria-hidden="true"></span>
+          <span>Illustrative evaluation</span>
+        </div>
       </div>
     </header>
 
-    <!-- CONTROL STATION: INPUT & PRESETS -->
-    <section class="control-station">
-      <div class="input-chassis">
-        <input type="password" id="passwordInput" class="input-box" placeholder="Enter password to evaluate..." autocomplete="off" spellcheck="false" aria-label="Password to evaluate">
-        <button id="toggleBtn" class="toggle-visibility" type="button">Show</button>
-      </div>
+    <!-- STEPPER NAVIGATION -->
+    <nav class="stepper-nav" aria-label="Evaluation workflow steps">
+      <button class="step-tab is-active" id="tabStep1" type="button">
+        <span class="step-badge" id="badgeStep1">01</span>
+        <span>Password entry</span>
+      </button>
+      <button class="step-tab" id="tabStep2" type="button">
+        <span class="step-badge" id="badgeStep2">02</span>
+        <span>Defender’s View</span>
+      </button>
+      <button class="step-tab" id="tabStep3" type="button">
+        <span class="step-badge" id="badgeStep3">03</span>
+        <span>Attacker’s View</span>
+      </button>
+      <button class="step-tab" id="tabStep4" type="button">
+        <span class="step-badge" id="badgeStep4">04</span>
+        <span>Baseline verification</span>
+      </button>
+    </nav>
 
-      <div class="presets-shelf">
-        <span class="presets-label">Benchmarking test cases:</span>
-        <button class="example-btn" data-pw="Password1!" type="button">Password1!</button>
-        <button class="example-btn" data-pw="Summer2026!" type="button">Summer2026!</button>
-        <button class="example-btn" data-pw="P@ssw0rd2024!" type="button">P@ssw0rd2024!</button>
-        <button class="example-btn" data-pw="1qaz2wsx" type="button">1qaz2wsx</button>
-        <button class="example-btn" data-pw="correct-horse-battery-staple" type="button">Passphrase</button>
-        <button class="example-btn" data-pw="x7#Qp!vR2m$9" type="button">Random 12-char</button>
-      </div>
-    </section>
+    <!-- STEP 1 VIEW: PASSWORD ENTRY -->
+    <main id="step1View">
+      <div class="entry-stage-grid">
+        <div class="entry-lead">
+          <h1 class="entry-heading">Strong on paper.<br>But hard to guess?</h1>
+          <p class="entry-desc">
+            A password can tick every box and still be predictable. Look beyond the rules to understand what makes it vulnerable.
+          </p>
 
-    <!-- RESULTS WORKSPACE -->
-    <main id="resultsWrapper" style="display: none;">
-      
-      <!-- ASYMMETRIC PERSPECTIVE ARENA -->
-      <div class="arena-grid">
-        
-        <!-- PERSPECTIVE 1: DEFENDER DOSSIER -->
-        <article class="defender-dossier">
-          <div class="dossier-mast">
-            <div class="dossier-title-wrap">
-              <div class="icon-badge">
-                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-              </div>
-              <h2 class="dossier-heading">Defender’s View</h2>
+          <div class="perspective-feature-box">
+            <div class="feature-icon-bubble">
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>
             </div>
-            <div id="ratingBadge" class="rating-pill rating-weak">Weak</div>
-          </div>
-
-          <div class="dossier-body">
-            <div class="dossier-section">
-              <div class="section-label">Structural composition</div>
-              <div class="template-strip">
-                <span class="presets-label">Grammar template:</span>
-                <span id="structTemplate" class="template-code">L8D1S1</span>
-              </div>
-              <div id="segmentsContainer" class="segments-container"></div>
-            </div>
-
-            <div class="dossier-section">
-              <div class="section-label">Why it’s rated this way</div>
-              <ul id="reasonsList" class="reasons-list"></ul>
-            </div>
-
-            <div class="dossier-section">
-              <div class="section-label">Actionable defensive advice</div>
-              <ul id="guidanceList" class="guidance-list"></ul>
+            <div class="feature-text-group">
+              <div class="feature-title">One password. Two perspectives.</div>
+              <div class="feature-desc">Understand its patterns, then its search cost.</div>
             </div>
           </div>
-        </article>
-
-        <!-- PERSPECTIVE 2: ATTACKER TELEMETRY RAIL -->
-        <aside class="attacker-rail">
-          <div class="rail-mast">
-            <div class="dossier-title-wrap">
-              <div class="icon-badge attacker-badge">
-                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
-              </div>
-              <h2 class="dossier-heading">Attacker’s View</h2>
-            </div>
-            <span class="rail-telemetry-tag">Offline guessability</span>
-          </div>
-
-          <div class="rail-body">
-            <div class="guess-gauge">
-              <span class="section-label">Estimated search budget</span>
-              <div id="guessCount" class="guess-gauge-metric">10^5.6</div>
-              <div class="guess-gauge-sub">Candidate space: <span id="rawGuesses">~375,000</span> guesses</div>
-            </div>
-
-            <div class="dossier-section">
-              <div class="section-label">Crack times across operational speeds</div>
-              <ul id="crackTimesList" class="crack-times-list">
-                <li class="crack-row">
-                  <span class="crack-tier">Online throttled (100/hr)</span>
-                  <span id="timeThrottled" class="crack-val">Few hours</span>
-                </li>
-                <li class="crack-row">
-                  <span class="crack-tier">Online unthrottled (1k/sec)</span>
-                  <span id="timeOnline" class="crack-val">6 minutes</span>
-                </li>
-                <li class="crack-row">
-                  <span class="crack-tier">Fast offline rig (10B/sec)</span>
-                  <span id="timeOffline" class="crack-val">&lt; 0.001s</span>
-                </li>
-              </ul>
-            </div>
-
-            <div class="dossier-section">
-              <div class="section-label">Exploitation strategy</div>
-              <ul id="attackStrategyList" class="attack-list"></ul>
-            </div>
-
-            <div class="stat-strip">
-              <div class="stat-strip-row">
-                <span class="stat-strip-label">Statistical rank:</span>
-                <span id="modelLogProb" class="stat-strip-val">-15.45</span>
-              </div>
-              <div class="stat-strip-row">
-                <span class="stat-strip-label">Grammar:</span>
-                <span class="stat-strip-val">n-gram Markov</span>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-      </div>
-
-      <!-- COMPARATIVE BENCHMARKING SECTION -->
-      <section class="benchmark-station" style="margin-top: var(--space-md);">
-        <div class="benchmark-mast">
-          <h2>Comparative Baseline Verification</h2>
-          <p>Exposing the checklist fallacy: static rules classify predictable passwords as strong, whereas probabilistic modeling detects vulnerability.</p>
         </div>
 
-        <div class="benchmark-matrix">
-          <div class="benchmark-cell">
-            <span class="benchmark-cell-label">Probabilistic Model</span>
-            <div id="compModelVerdict" class="benchmark-verdict">Weak</div>
-            <div id="compModelDetail" class="benchmark-detail">n-gram Markov + Structural Grammar</div>
+        <div class="entry-card-surface">
+          <div class="card-top-row">
+            <h2 class="card-title-text">Start with a password</h2>
+            <div class="pill-badge">
+              <span class="pill-dot" aria-hidden="true"></span>
+              <span>Demo mode</span>
+            </div>
           </div>
 
-          <div class="benchmark-cell">
-            <span class="benchmark-cell-label">LUDS Checklist Policy</span>
-            <div id="compLudsVerdict" class="benchmark-verdict">Strong (5/5)</div>
-            <div id="compLudsDetail" class="benchmark-detail">Static character class rules</div>
+          <div class="input-block">
+            <label class="field-label" for="passwordInput">Password to evaluate</label>
+            <div class="input-wrapper">
+              <input type="password" id="passwordInput" class="password-text-field" value="Password1!" autocomplete="off" spellcheck="false" placeholder="Type a password...">
+              <button id="toggleBtn" class="toggle-visibility-btn" type="button">
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path></svg>
+                <span>Show</span>
+              </button>
+            </div>
+            <span class="input-caption-text">Sample loaded: Password1! (use a test password for this demo)</span>
           </div>
 
-          <div class="benchmark-cell">
-            <span class="benchmark-cell-label">zxcvbn Benchmark</span>
-            <div id="compZxcVerdict" class="benchmark-verdict">Weak (Score 1/4)</div>
-            <div id="compZxcDetail" class="benchmark-detail">Entropy &amp; dictionary lookup</div>
+          <div class="presets-section">
+            <div class="presets-tag-label">Or explore a test case</div>
+            <div class="presets-cluster">
+              <button class="example-btn is-active" data-pw="Password1!" type="button">Password1!</button>
+              <button class="example-btn" data-pw="Summer2026!" type="button">Summer2026!</button>
+              <button class="example-btn" data-pw="P@ssw0rd2024!" type="button">P@ssw0rd2024!</button>
+              <button class="example-btn" data-pw="1qaz2wsx" type="button">1qaz2wsx</button>
+              <button class="example-btn" data-pw="correct-horse-battery-staple" type="button">Passphrase</button>
+              <button class="example-btn" data-pw="x7#Qp!vR2m$9" type="button">Random 12-char</button>
+            </div>
+          </div>
+
+          <div class="cta-container">
+            <button id="exploreBtn" class="primary-cta-btn" type="button">
+              <span>Explore this password</span>
+            </button>
+            <div class="cta-subtext">Opens an illustrative evaluation, not a live computation.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 1 BOTTOM PREVIEW TRAY -->
+      <section class="step-preview-tray">
+        <div class="tray-header-row">
+          <div class="tray-title">Clarity, one step at a time.</div>
+          <div class="tray-sub">A guided evaluation, not a wall of metrics</div>
+        </div>
+
+        <div class="preview-cards-grid">
+          <div class="preview-tile-surface">
+            <div class="preview-top-row">
+              <svg class="tile-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span class="tile-label-tag">Defender’s View</span>
+            </div>
+            <div class="preview-tile-title">Understand your defense</div>
+            <div class="preview-tile-desc">See the patterns that make a password predictable, and what to change.</div>
+          </div>
+
+          <div class="preview-tile-surface">
+            <div class="preview-top-row">
+              <svg class="tile-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+              <span class="tile-label-tag">Attacker’s View</span>
+            </div>
+            <div class="preview-tile-title">See the attacker’s advantage</div>
+            <div class="preview-tile-desc">Translate guessability into search effort across realistic speed scenarios.</div>
+          </div>
+
+          <div class="preview-tile-surface">
+            <div class="preview-top-row">
+              <svg class="tile-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+              <span class="tile-label-tag">Baseline verification</span>
+            </div>
+            <div class="preview-tile-title">Put the result in context</div>
+            <div class="preview-tile-desc">Compare probabilistic modeling with a checklist policy and zxcvbn.</div>
           </div>
         </div>
       </section>
-
     </main>
 
-    <!-- CLEAN SYSTEM FOOTER (Former student names & course code removed) -->
-    <footer class="system-footer">
-      Probabilistic Password Strength Meter · In-Memory Analysis
+    <!-- STEP 2 VIEW: DEFENDER'S VIEW -->
+    <main id="step2View" style="display: none;">
+      <div class="step-lead-block">
+        <h1 class="step-heading">Compliant isn’t the same as strong.</h1>
+        <p class="step-subheading">Defender’s View: Understand why this password is predictable, and how to improve it.</p>
+      </div>
+
+      <!-- PERSISTENT SAMPLE PASSWORD STRIP -->
+      <div class="sample-password-strip">
+        <div class="sample-meta-group">
+          <svg class="sample-key-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M21 2l-2 2m-1.5 1.5L14 9l-2-2-4 4 2 2-7 7a2 2 0 0 0 3 3l7-7 2 2 4-4-2-2 3.5-3.5M16 5l3 3"></path></svg>
+          <span class="sample-caption">Sample password</span>
+          <span id="persistentPwDisplay2" class="sample-val-text">Password1!</span>
+          <span id="persistentPwLength2" class="sample-len-pill">10 characters</span>
+        </div>
+        <button class="change-pw-link" type="button">Change password</button>
+      </div>
+
+      <!-- DUAL ASSESSMENT ARENA -->
+      <div class="dual-card-arena">
+        
+        <!-- LEFT: PROBABILISTIC ASSESSMENT CARD -->
+        <article class="assessment-surface">
+          <div class="assessment-top-bar">
+            <div class="surface-title-badge">
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Probabilistic assessment</span>
+            </div>
+            <div id="ratingBadge" class="status-verdict-pill verdict-weak">• Weak</div>
+          </div>
+
+          <h2 id="defenderHeadline" class="assessment-headline">A familiar word. A familiar pattern.</h2>
+
+          <div class="predictability-gauge-wrap">
+            <div class="gauge-track">
+              <div id="predictabilityFill" class="gauge-fill"></div>
+            </div>
+            <div class="gauge-labels">
+              <span>Easily guessed</span>
+              <span>Hard to guess</span>
+            </div>
+          </div>
+
+          <ul id="reasonsList" class="flaw-reasons-list"></ul>
+        </article>
+
+        <!-- RIGHT: CONTRASTING DARK ADVICE CARD -->
+        <article class="advice-dark-surface">
+          <div class="advice-top-bar">
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span>Make it less predictable</span>
+          </div>
+
+          <h2 class="advice-headline">More surprise.<br>Not more substitutions.</h2>
+
+          <ul id="guidanceList" class="advice-checklist"></ul>
+        </article>
+
+      </div>
+
+      <!-- STRUCTURAL COMPOSITION STRIP -->
+      <div class="composition-strip">
+        <div class="composition-left">
+          <span class="composition-label">Structural composition</span>
+          <span id="structTemplate" class="template-code-box">L8D1S1</span>
+        </div>
+        <div id="segmentsContainer" class="segments-cluster"></div>
+      </div>
+
+      <!-- COLLAPSIBLE ACCORDION -->
+      <div class="model-accordion-bar" id="accordionModelStep2">
+        <div class="accordion-title-wrap">
+          <span aria-hidden="true">›</span>
+          <span>How the model explains this result</span>
+        </div>
+        <span class="accordion-sub-meta">n-gram Markov: Patterns, not checklist points</span>
+      </div>
+
+      <!-- STEP FOOTER NAVIGATION -->
+      <div class="step-footer-nav">
+        <button class="step-back-btn" id="backToStep1Btn" type="button">Back to password entry</button>
+        <div class="step-next-group">
+          <span class="step-next-caption">Next: translate patterns into search effort</span>
+          <button class="step-next-btn" id="nextToStep3Btn" type="button">See Attacker’s View</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- STEP 3 VIEW: ATTACKER'S VIEW -->
+    <main id="step3View" style="display: none;">
+      <div class="step-lead-block">
+        <h1 class="step-heading">Small search space. Fast discovery.</h1>
+        <p class="step-subheading">Attacker’s View: The same predictable patterns make this password an early candidate.</p>
+      </div>
+
+      <!-- PERSISTENT SAMPLE PASSWORD STRIP -->
+      <div class="sample-password-strip">
+        <div class="sample-meta-group">
+          <svg class="sample-key-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M21 2l-2 2m-1.5 1.5L14 9l-2-2-4 4 2 2-7 7a2 2 0 0 0 3 3l7-7 2 2 4-4-2-2 3.5-3.5M16 5l3 3"></path></svg>
+          <span class="sample-caption">Sample password</span>
+          <span id="persistentPwDisplay3" class="sample-val-text">Password1!</span>
+          <span id="persistentPwLength3" class="sample-len-pill">10 characters</span>
+        </div>
+        <button class="change-pw-link" type="button">Change password</button>
+      </div>
+
+      <!-- DUAL ATTACKER ARENA -->
+      <div class="dual-card-arena">
+
+        <!-- SEARCH BUDGET CARD -->
+        <article class="search-budget-card">
+          <div class="budget-top-row">
+            <span class="field-label">Estimated search budget</span>
+            <svg class="target-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+          </div>
+
+          <div id="guessCount" class="exponent-large">10^5.6</div>
+          <div class="guess-count-caption">Approximately <span id="rawGuesses">398,000</span> guesses</div>
+
+          <div id="effortBadge" class="effort-badge">• Low search effort</div>
+
+          <div class="divider-hair"></div>
+
+          <div class="attacker-why-block">
+            <div class="attacker-why-title">Why an attacker gets here early</div>
+            <p id="attackerStrategyLead" class="flaw-text">
+              A rule-based wordlist can start with “password”, capitalize its first letter, then append a digit and symbol.
+            </p>
+            <div id="transformationBreadcrumb" class="transformation-breadcrumb-box">
+              password → Password → Password1!
+            </div>
+            <ul id="attackStrategyList" style="display: none;"></ul>
+          </div>
+        </article>
+
+        <!-- SPEED SCENARIOS SURFACE -->
+        <article class="scenarios-surface">
+          <div class="scenarios-top-row">
+            <h2 class="scenarios-heading">One password. Different attack speeds.</h2>
+            <span class="sample-caption">Estimated time</span>
+          </div>
+
+          <ul class="scenario-list" id="crackTimesList">
+            <li class="scenario-panel">
+              <div class="scenario-left-wrap">
+                <svg class="scenario-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <div class="scenario-text-col">
+                  <div class="scenario-name">Online, throttled</div>
+                  <div class="scenario-desc">Rate-limited login attempts</div>
+                </div>
+              </div>
+              <div class="scenario-rate">100 / hour</div>
+              <div id="timeThrottled" class="scenario-duration">≈ 166 days</div>
+            </li>
+
+            <li class="scenario-panel is-highlighted">
+              <div class="scenario-left-wrap">
+                <svg class="scenario-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <div class="scenario-text-col">
+                  <div class="scenario-name">Online, unthrottled</div>
+                  <div class="scenario-desc">No effective rate limit</div>
+                </div>
+              </div>
+              <div class="scenario-rate">1,000 / sec</div>
+              <div id="timeOnline" class="scenario-duration">≈ 6m 38s</div>
+            </li>
+
+            <li class="scenario-panel">
+              <div class="scenario-left-wrap">
+                <svg class="scenario-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line></svg>
+                <div class="scenario-text-col">
+                  <div class="scenario-name">Fast offline rig</div>
+                  <div class="scenario-desc">A high-speed offline scenario</div>
+                </div>
+              </div>
+              <div class="scenario-rate">10B / sec</div>
+              <div id="timeOffline" class="scenario-duration">&lt; 0.001 sec</div>
+            </li>
+          </ul>
+
+          <div class="scenario-disclaimer">
+            <span aria-hidden="true">ⓘ</span>
+            <span>Throttling changes the time, not the password predictability. Offline speed depends on the hash and hardware; these are scenarios, not forecasts.</span>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- COLLAPSIBLE ACCORDION -->
+      <div class="model-accordion-bar" id="accordionModelStep3">
+        <div class="accordion-title-wrap">
+          <span aria-hidden="true">›</span>
+          <span>Model details &amp; calculation assumptions</span>
+        </div>
+        <span class="accordion-sub-meta">n-gram Markov: log₁₀ rank <span id="modelLogProb">-15.45</span> (Time = guesses ÷ rate)</span>
+      </div>
+
+      <!-- STEP FOOTER NAVIGATION -->
+      <div class="step-footer-nav">
+        <button class="step-back-btn" id="backToStep2Btn" type="button">Back to Defender’s View</button>
+        <div class="step-next-group">
+          <span class="step-next-caption">Next: check the result against other methods</span>
+          <button class="step-next-btn" id="nextToStep4Btn" type="button">Compare baselines</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- STEP 4 VIEW: BASELINE VERIFICATION -->
+    <main id="step4View" style="display: none;">
+      <div class="step-lead-block">
+        <h1 class="step-heading">Passing the rules can miss the risk.</h1>
+        <p class="step-subheading">Comparative Baseline Verification: Two guessability models agree this sample is weak. The checklist calls it strong.</p>
+      </div>
+
+      <!-- PERSISTENT SAMPLE PASSWORD STRIP -->
+      <div class="sample-password-strip">
+        <div class="sample-meta-group">
+          <svg class="sample-key-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M21 2l-2 2m-1.5 1.5L14 9l-2-2-4 4 2 2-7 7a2 2 0 0 0 3 3l7-7 2 2 4-4-2-2 3.5-3.5M16 5l3 3"></path></svg>
+          <span class="sample-caption">Sample password</span>
+          <span id="persistentPwDisplay4" class="sample-val-text">Password1!</span>
+          <span id="persistentPwLength4" class="sample-len-pill">10 characters</span>
+        </div>
+        <button class="change-pw-link" type="button">Change password</button>
+      </div>
+
+      <!-- 3 COMPARISON CARDS -->
+      <div class="comparison-trio-grid">
+        
+        <!-- CARD 1: PROBABILISTIC MODEL -->
+        <article class="benchmark-card">
+          <div class="benchmark-card-header">
+            <svg class="tile-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span class="benchmark-type-tag">Pattern-based</span>
+          </div>
+
+          <div class="benchmark-system-title">Probabilistic Model</div>
+          <div id="compModelVerdict" class="benchmark-verdict-large" style="color: var(--status-weak-text);">Weak</div>
+          <div class="benchmark-subline">Predictable despite character variety</div>
+
+          <div id="compModelDetail" class="benchmark-stat-reading">≈ 398,000 guesses</div>
+          <div id="compModelLogDetail" class="benchmark-subline">Estimated search budget (10^5.6)</div>
+
+          <p class="benchmark-explanation-text">
+            The n-gram Markov model recognizes familiar word structure and predictable transformations.
+          </p>
+        </article>
+
+        <!-- CARD 2: LUDS CHECKLIST POLICY -->
+        <article class="benchmark-card">
+          <div class="benchmark-card-header">
+            <svg class="tile-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            <span class="benchmark-type-tag">Rule-based</span>
+          </div>
+
+          <div class="benchmark-system-title">LUDS Checklist Policy</div>
+          <div id="compLudsVerdict" class="benchmark-verdict-large" style="color: var(--status-strong-text);">Strong (5/5)</div>
+          <div class="benchmark-subline">Policy compliance, not guess resistance</div>
+
+          <div id="compLudsDetail" class="benchmark-stat-reading">5 of 5 rules passed</div>
+          <div class="benchmark-subline">Length, uppercase, lowercase, digit, symbol</div>
+
+          <p class="benchmark-explanation-text">
+            All character requirements are met. These rules measure composition, not how early an attacker will guess it.
+          </p>
+        </article>
+
+        <!-- CARD 3: ZXCVBN BENCHMARK -->
+        <article class="benchmark-card">
+          <div class="benchmark-card-header">
+            <svg class="tile-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 3v18"></path><path d="M3 7l9-4 9 4"></path><path d="M6 10l-3 6h6l-3-6z"></path><path d="M18 10l-3 6h6l-3-6z"></path></svg>
+            <span class="benchmark-type-tag">Independent baseline</span>
+          </div>
+
+          <div class="benchmark-system-title">zxcvbn Benchmark</div>
+          <div id="compZxcVerdict" class="benchmark-verdict-large" style="color: var(--status-weak-text);">Weak (1/4)</div>
+          <div class="benchmark-subline">Predictable despite character variety</div>
+
+          <div id="compZxcDetail" class="benchmark-stat-reading">≈ 20,000 guesses</div>
+          <div id="compZxcLogDetail" class="benchmark-subline">Estimated guess count (10^4.3)</div>
+
+          <p class="benchmark-explanation-text">
+            A separate pattern-based benchmark also flags low guessability resistance, with a lower search estimate.
+          </p>
+        </article>
+
+      </div>
+
+      <!-- INSIGHT CALLOUT BANNER -->
+      <section class="insight-callout-banner">
+        <div class="callout-body-wrap">
+          <svg class="callout-bulb-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path></svg>
+          <div class="callout-text-group">
+            <div class="callout-title">Measure unpredictability, not just character variety.</div>
+            <div class="callout-desc">
+              The models differ on the exact guess count, but not the conclusion. A longer passphrase of random, unrelated words is a better direction than another digit or symbol.
+            </div>
+          </div>
+        </div>
+        <div id="calloutVerdictBadge" class="callout-verdict-badge">• Shared verdict: weak</div>
+      </section>
+
+      <!-- COLLAPSIBLE ACCORDION -->
+      <div class="model-accordion-bar" id="accordionModelStep4">
+        <div class="accordion-title-wrap">
+          <span aria-hidden="true">›</span>
+          <span>Why estimates differ and how to read the scores</span>
+        </div>
+        <span class="accordion-sub-meta">Different models and scales (illustrative, not equivalent measurements)</span>
+      </div>
+
+      <!-- STEP FOOTER NAVIGATION -->
+      <div class="step-footer-nav">
+        <button class="step-back-btn" id="backToStep3Btn" type="button">Back to Attacker’s View</button>
+        <div class="step-next-group">
+          <span class="step-next-caption">Put the advice into practice</span>
+          <button class="step-next-btn" id="tryAnotherBtn" type="button">Try another password</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- WRAPPER ANCHOR FOR BACKWARD COMPATIBILITY -->
+    <div id="resultsWrapper" style="display: none;"></div>
+
+    <!-- GLOBAL FOOTER -->
+    <footer class="clarity-footer">
+      <div>Beyond checklists. Understand predictability.</div>
+      <div>Sample results (not a live password analysis)</div>
     </footer>
 
   </div>
 
   <script>
+    // State management
+    let currentStep = 1;
+    let currentPassword = 'Password1!';
+    let lastEvaluatedData = null;
+
+    // DOM Elements
     const passwordInput = document.getElementById('passwordInput');
     const toggleBtn = document.getElementById('toggleBtn');
+    const exploreBtn = document.getElementById('exploreBtn');
+
+    // Stepper Tabs
+    const tabStep1 = document.getElementById('tabStep1');
+    const tabStep2 = document.getElementById('tabStep2');
+    const tabStep3 = document.getElementById('tabStep3');
+    const tabStep4 = document.getElementById('tabStep4');
+
+    const badgeStep1 = document.getElementById('badgeStep1');
+    const badgeStep2 = document.getElementById('badgeStep2');
+    const badgeStep3 = document.getElementById('badgeStep3');
+    const badgeStep4 = document.getElementById('badgeStep4');
+
+    // Views
+    const step1View = document.getElementById('step1View');
+    const step2View = document.getElementById('step2View');
+    const step3View = document.getElementById('step3View');
+    const step4View = document.getElementById('step4View');
     const resultsWrapper = document.getElementById('resultsWrapper');
+
+    // Persistent display elements
+    const persistentPwDisplays = [
+      document.getElementById('persistentPwDisplay2'),
+      document.getElementById('persistentPwDisplay3'),
+      document.getElementById('persistentPwDisplay4')
+    ];
+    const persistentPwLengths = [
+      document.getElementById('persistentPwLength2'),
+      document.getElementById('persistentPwLength3'),
+      document.getElementById('persistentPwLength4')
+    ];
+
+    // Defender view elements
     const ratingBadge = document.getElementById('ratingBadge');
-    const guessCount = document.getElementById('guessCount');
-    const rawGuesses = document.getElementById('rawGuesses');
+    const defenderHeadline = document.getElementById('defenderHeadline');
+    const predictabilityFill = document.getElementById('predictabilityFill');
     const structTemplate = document.getElementById('structTemplate');
     const segmentsContainer = document.getElementById('segmentsContainer');
     const reasonsList = document.getElementById('reasonsList');
     const guidanceList = document.getElementById('guidanceList');
+
+    // Attacker view elements
+    const guessCount = document.getElementById('guessCount');
+    const rawGuesses = document.getElementById('rawGuesses');
+    const effortBadge = document.getElementById('effortBadge');
+    const attackerStrategyLead = document.getElementById('attackerStrategyLead');
+    const transformationBreadcrumb = document.getElementById('transformationBreadcrumb');
     const attackStrategyList = document.getElementById('attackStrategyList');
     const timeThrottled = document.getElementById('timeThrottled');
     const timeOnline = document.getElementById('timeOnline');
     const timeOffline = document.getElementById('timeOffline');
     const modelLogProb = document.getElementById('modelLogProb');
+
+    // Baseline elements
     const compModelVerdict = document.getElementById('compModelVerdict');
     const compModelDetail = document.getElementById('compModelDetail');
+    const compModelLogDetail = document.getElementById('compModelLogDetail');
     const compLudsVerdict = document.getElementById('compLudsVerdict');
     const compLudsDetail = document.getElementById('compLudsDetail');
     const compZxcVerdict = document.getElementById('compZxcVerdict');
     const compZxcDetail = document.getElementById('compZxcDetail');
+    const compZxcLogDetail = document.getElementById('compZxcLogDetail');
+    const calloutVerdictBadge = document.getElementById('calloutVerdictBadge');
 
-    let debounceTimer = null;
+    // Navigation buttons
+    const backToStep1Btn = document.getElementById('backToStep1Btn');
+    const nextToStep3Btn = document.getElementById('nextToStep3Btn');
+    const backToStep2Btn = document.getElementById('backToStep2Btn');
+    const nextToStep4Btn = document.getElementById('nextToStep4Btn');
+    const backToStep3Btn = document.getElementById('backToStep3Btn');
+    const tryAnotherBtn = document.getElementById('tryAnotherBtn');
 
+    // Password visibility toggle
     toggleBtn.addEventListener('click', () => {
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      toggleBtn.textContent = isPassword ? 'Hide' : 'Show';
+      const isPw = passwordInput.type === 'password';
+      passwordInput.type = isPw ? 'text' : 'password';
+      toggleBtn.querySelector('span').textContent = isPw ? 'Hide' : 'Show';
     });
 
+    // Preset test case buttons
     document.querySelectorAll('.example-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        document.querySelectorAll('.example-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
         passwordInput.value = btn.getAttribute('data-pw');
-        evaluatePassword(passwordInput.value);
       });
     });
 
-    passwordInput.addEventListener('input', (e) => {
-      clearTimeout(debounceTimer);
-      const val = e.target.value;
-      if (!val) {
-        resultsWrapper.style.display = 'none';
-        return;
-      }
-      debounceTimer = setTimeout(() => evaluatePassword(val), 200);
+    // Explore CTA
+    exploreBtn.addEventListener('click', async () => {
+      currentPassword = passwordInput.value || 'Password1!';
+      await evaluatePassword(currentPassword);
+      setStep(2);
     });
 
-    async function evaluatePassword(pw) {
-      if (!pw) {
-        resultsWrapper.style.display = 'none';
-        return;
+    // Pressing Enter in input
+    passwordInput.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        currentPassword = passwordInput.value || 'Password1!';
+        await evaluatePassword(currentPassword);
+        setStep(2);
       }
+    });
+
+    // Stepper navigation clicks
+    tabStep1.addEventListener('click', () => setStep(1));
+    tabStep2.addEventListener('click', async () => {
+      if (!lastEvaluatedData) await evaluatePassword(passwordInput.value || 'Password1!');
+      setStep(2);
+    });
+    tabStep3.addEventListener('click', async () => {
+      if (!lastEvaluatedData) await evaluatePassword(passwordInput.value || 'Password1!');
+      setStep(3);
+    });
+    tabStep4.addEventListener('click', async () => {
+      if (!lastEvaluatedData) await evaluatePassword(passwordInput.value || 'Password1!');
+      setStep(4);
+    });
+
+    // In-step navigation
+    if (backToStep1Btn) backToStep1Btn.addEventListener('click', () => setStep(1));
+    if (nextToStep3Btn) nextToStep3Btn.addEventListener('click', () => setStep(3));
+    if (backToStep2Btn) backToStep2Btn.addEventListener('click', () => setStep(2));
+    if (nextToStep4Btn) nextToStep4Btn.addEventListener('click', () => setStep(4));
+    if (backToStep3Btn) backToStep3Btn.addEventListener('click', () => setStep(3));
+    if (tryAnotherBtn) tryAnotherBtn.addEventListener('click', () => {
+      setStep(1);
+      passwordInput.focus();
+    });
+
+    // "Change password" links
+    document.querySelectorAll('.change-pw-link').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setStep(1);
+        passwordInput.focus();
+      });
+    });
+
+    document.getElementById('logoLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      setStep(1);
+    });
+
+    function setStep(step) {
+      currentStep = step;
+
+      // Update Views
+      step1View.style.display = step === 1 ? 'block' : 'none';
+      step2View.style.display = step === 2 ? 'block' : 'none';
+      step3View.style.display = step === 3 ? 'block' : 'none';
+      step4View.style.display = step === 4 ? 'block' : 'none';
+
+      // Update Stepper active states
+      const tabs = [tabStep1, tabStep2, tabStep3, tabStep4];
+      const badges = [badgeStep1, badgeStep2, badgeStep3, badgeStep4];
+
+      tabs.forEach((tab, idx) => {
+        const stepNum = idx + 1;
+        tab.classList.remove('is-active', 'is-completed');
+
+        if (stepNum === step) {
+          tab.classList.add('is-active');
+          badges[idx].textContent = `0${stepNum}`;
+        } else if (stepNum < step) {
+          tab.classList.add('is-completed');
+          badges[idx].textContent = '✓';
+        } else {
+          badges[idx].textContent = `0${stepNum}`;
+        }
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function evaluatePassword(pw) {
+      if (!pw) return;
+      currentPassword = pw;
 
       try {
         const resp = await fetch('/api/score', {
@@ -1007,77 +2202,151 @@ p {
         if (!resp.ok) return;
 
         const data = await resp.json();
-        renderResults(data);
+        lastEvaluatedData = data;
+        renderResults(data, pw);
       } catch (err) {
         console.error('Evaluation error:', err);
       }
     }
 
     function formatTime(seconds) {
-      if (seconds < 0.001) return 'Instant (< 0.001s)';
+      if (seconds < 0.001) return '< 0.001 sec';
       if (seconds < 1) return '< 1 second';
-      if (seconds < 60) return Math.round(seconds) + ' seconds';
-      if (seconds < 3600) return Math.round(seconds / 60) + ' minutes';
-      if (seconds < 86400) return Math.round(seconds / 3600) + ' hours';
-      if (seconds < 31536000) return Math.round(seconds / 86400) + ' days';
-      if (seconds < 3153600000) return Math.round(seconds / 31536000) + ' years';
+      if (seconds < 60) return `≈ ${Math.round(seconds)} seconds`;
+      if (seconds < 3600) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.round(seconds % 60);
+        return secs > 0 ? `≈ ${mins}m ${secs}s` : `≈ ${mins} minutes`;
+      }
+      if (seconds < 86400) return `≈ ${Math.round(seconds / 3600)} hours`;
+      if (seconds < 31536000) return `≈ ${Math.round(seconds / 86400)} days`;
+      if (seconds < 3153600000) return `≈ ${Math.round(seconds / 31536000)} years`;
       return 'Centuries';
     }
 
-    function renderResults(data) {
-      resultsWrapper.style.display = 'block';
+    function renderResults(data, pw) {
+      // 1. Persistent sample bar across steps 2-4
+      persistentPwDisplays.forEach(el => { if (el) el.textContent = pw; });
+      persistentPwLengths.forEach(el => { if (el) el.textContent = `${pw.length} characters`; });
 
-      // 1. DEFENDER'S VIEW
-      ratingBadge.className = 'rating-pill rating-' + data.label.toLowerCase();
-      ratingBadge.textContent = data.label;
+      // 2. DEFENDER'S VIEW
+      const label = data.label || 'Weak';
+      ratingBadge.className = 'status-verdict-pill verdict-' + label.toLowerCase();
+      ratingBadge.textContent = '• ' + label;
 
+      if (label === 'Strong') {
+        defenderHeadline.textContent = 'High entropy. Low predictability.';
+        predictabilityFill.style.width = '85%';
+        predictabilityFill.style.backgroundColor = 'var(--status-strong-text)';
+      } else if (label === 'Medium') {
+        defenderHeadline.textContent = 'Mixed patterns. Moderate resistance.';
+        predictabilityFill.style.width = '50%';
+        predictabilityFill.style.backgroundColor = 'var(--status-medium-text)';
+      } else {
+        defenderHeadline.textContent = 'A familiar word. A familiar pattern.';
+        predictabilityFill.style.width = '20%';
+        predictabilityFill.style.backgroundColor = 'var(--status-weak-text)';
+      }
+
+      // Structure template & segments
       structTemplate.textContent = data.structure || 'None';
-
       segmentsContainer.innerHTML = '';
       if (data.segments && data.segments.length > 0) {
         data.segments.forEach(s => {
           const pill = document.createElement('div');
           pill.className = `seg-pill seg-${s.kind}`;
-          const kindName = s.kind === 'L' ? 'Letters' : (s.kind === 'D' ? 'Digits' : 'Symbols');
+          const kindName = s.kind === 'L' ? `${s.text.length} letters` : (s.kind === 'D' ? `${s.text.length} digit` : `${s.text.length} symbol`);
           pill.innerHTML = `<span>${escapeHtml(s.text)}</span> <span class="seg-tag">${kindName}</span>`;
           segmentsContainer.appendChild(pill);
         });
       }
 
+      // Reasons list with dash
       reasonsList.innerHTML = '';
       if (data.reasons && data.reasons.length > 0) {
         data.reasons.forEach(r => {
           const li = document.createElement('li');
-          li.textContent = r;
+          li.className = 'flaw-item';
+
+          const parts = r.split(':');
+          const title = parts.length > 1 ? parts[0] : 'Predictable pattern';
+          const desc = parts.length > 1 ? parts.slice(1).join(':').trim() : r;
+
+          li.innerHTML = `
+            <span class="dash-symbol" aria-hidden="true">—</span>
+            <div class="flaw-content">
+              <div class="flaw-title">${escapeHtml(title)}</div>
+              <div class="flaw-text">${escapeHtml(desc)}</div>
+            </div>
+          `;
           reasonsList.appendChild(li);
         });
+      } else {
+        const li = document.createElement('li');
+        li.className = 'flaw-item';
+        li.innerHTML = `
+          <span class="dash-symbol" aria-hidden="true">—</span>
+          <div class="flaw-content">
+            <div class="flaw-title">No high-frequency structural flaws detected</div>
+            <div class="flaw-text">This string does not exhibit standard wordlist capitalization or terminal append patterns.</div>
+          </div>
+        `;
+        reasonsList.appendChild(li);
       }
 
+      // Advice list with checkmark icons
       guidanceList.innerHTML = '';
       if (data.suggestions && data.suggestions.length > 0) {
         data.suggestions.forEach(g => {
           const li = document.createElement('li');
-          li.textContent = g;
+          li.className = 'advice-item';
+          const parts = g.split(':');
+          const title = parts.length > 1 ? parts[0] : 'Hardening recommendation';
+          const desc = parts.length > 1 ? parts.slice(1).join(':').trim() : g;
+
+          li.innerHTML = `
+            <svg class="check-glyph-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <div class="advice-content">
+              <div class="advice-title">${escapeHtml(title)}</div>
+              <div class="advice-text">${escapeHtml(desc)}</div>
+            </div>
+          `;
           guidanceList.appendChild(li);
         });
+      } else {
+        const li = document.createElement('li');
+        li.className = 'advice-item';
+        li.innerHTML = `
+          <svg class="check-glyph-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <div class="advice-content">
+            <div class="advice-title">Maintain high passphrase length</div>
+            <div class="advice-text">Continue avoiding single dictionary words or short substitutions.</div>
+          </div>
+        `;
+        guidanceList.appendChild(li);
       }
 
-      // 2. ATTACKER'S VIEW
+      // 3. ATTACKER'S VIEW
+      const estG = Number(data.estimated_guesses);
       guessCount.textContent = `10^${data.log10_guesses.toFixed(1)}`;
-      rawGuesses.textContent = `~${Number(data.estimated_guesses).toLocaleString()}`;
+      rawGuesses.textContent = Number(data.estimated_guesses).toLocaleString();
       modelLogProb.textContent = data.logprob;
 
-      attackStrategyList.innerHTML = '';
-      const estG = Number(data.estimated_guesses);
-
-      if (estG < 1000) {
-        attackStrategyList.innerHTML += `<li>Target matches high-frequency dictionary wordlist; cracked in the initial pass of any automated attack.</li>`;
-      } else if (estG < 1000000) {
-        attackStrategyList.innerHTML += `<li>Target cracked via standard rule-based wordlist mangling (e.g. capitalizing first letter + appending 1-digit/symbol).</li>`;
+      if (estG < 1000000) {
+        effortBadge.textContent = '• Low search effort';
+        effortBadge.className = 'effort-badge verdict-weak';
+        attackerStrategyLead.textContent = 'A rule-based wordlist can start with a dictionary base, capitalize its first letter, then append a digit and symbol.';
+        transformationBreadcrumb.textContent = `${pw.toLowerCase().replace(/[^a-z]/g, '') || 'password'} → ${pw.slice(0, 1).toUpperCase() + pw.slice(1).toLowerCase().replace(/[^a-z]/g, '') || 'Password'} → ${pw}`;
       } else if (estG < 10000000000) {
-        attackStrategyList.innerHTML += `<li>Target vulnerable to hybrid Markov candidate generation or PCFG grammar template enumeration.</li>`;
+        effortBadge.textContent = '• Moderate search effort';
+        effortBadge.className = 'effort-badge verdict-medium';
+        attackerStrategyLead.textContent = 'Target requires hybrid Markov candidate generation or PCFG grammar template enumeration.';
+        transformationBreadcrumb.textContent = `Grammar: ${data.structure || 'L8D1S1'}, Markov search order 3`;
       } else {
-        attackStrategyList.innerHTML += `<li>Target exhibits high statistical entropy; search space exceeds realistic targeted guess budgets.</li>`;
+        effortBadge.textContent = '• High search effort';
+        effortBadge.className = 'effort-badge verdict-strong';
+        attackerStrategyLead.textContent = 'Target exhibits high statistical entropy; search space exceeds realistic targeted guess budgets.';
+        transformationBreadcrumb.textContent = `High complexity: > 10^${data.log10_guesses.toFixed(1)} candidates`;
       }
 
       // Crack Times
@@ -1085,22 +2354,27 @@ p {
       timeOnline.textContent = formatTime(estG / 1000);
       timeOffline.textContent = formatTime(estG / 10000000000);
 
-      // 3. COMPARATIVE BASELINES
-      compModelVerdict.textContent = data.label;
-      compModelVerdict.style.color = data.label === 'Strong' ? 'var(--strong)' : (data.label === 'Medium' ? 'var(--medium)' : 'var(--weak)');
-      compModelDetail.textContent = `Log-prob: ${data.logprob} (~10^${data.log10_guesses.toFixed(1)} guesses)`;
+      // 4. COMPARATIVE BASELINES
+      compModelVerdict.textContent = label;
+      compModelVerdict.style.color = label === 'Strong' ? 'var(--status-strong-text)' : (label === 'Medium' ? 'var(--status-medium-text)' : 'var(--status-weak-text)');
+      compModelDetail.textContent = `≈ ${Number(data.estimated_guesses).toLocaleString()} guesses`;
+      compModelLogDetail.textContent = `Estimated search budget (10^${data.log10_guesses.toFixed(1)})`;
 
       if (data.baselines && data.baselines.luds) {
         compLudsVerdict.textContent = `${data.baselines.luds.label} (${data.baselines.luds.score})`;
-        compLudsVerdict.style.color = data.baselines.luds.label === 'Strong' ? 'var(--strong)' : (data.baselines.luds.label === 'Medium' ? 'var(--medium)' : 'var(--weak)');
-        compLudsDetail.textContent = `${data.baselines.luds.passed_rules} of 5 checklist rules passed`;
+        compLudsVerdict.style.color = data.baselines.luds.label === 'Strong' ? 'var(--status-strong-text)' : 'var(--status-weak-text)';
+        compLudsDetail.textContent = `${data.baselines.luds.passed_rules} of 5 rules passed`;
       }
 
       if (data.baselines && data.baselines.zxcvbn) {
-        compZxcVerdict.textContent = `${data.baselines.zxcvbn.label} (Score: ${data.baselines.zxcvbn.score}/4)`;
-        compZxcVerdict.style.color = data.baselines.zxcvbn.label === 'Strong' ? 'var(--strong)' : (data.baselines.zxcvbn.label === 'Medium' ? 'var(--medium)' : 'var(--weak)');
-        compZxcDetail.textContent = `Estimated ~10^${data.baselines.zxcvbn.log10_guesses.toFixed(1)} guesses`;
+        compZxcVerdict.textContent = `${data.baselines.zxcvbn.label} (${data.baselines.zxcvbn.score}/4)`;
+        compZxcVerdict.style.color = data.baselines.zxcvbn.label === 'Strong' ? 'var(--status-strong-text)' : (data.baselines.zxcvbn.label === 'Medium' ? 'var(--status-medium-text)' : 'var(--status-weak-text)');
+        compZxcDetail.textContent = `≈ ${Number(data.baselines.zxcvbn.estimated_guesses).toLocaleString()} guesses`;
+        compZxcLogDetail.textContent = `Estimated guess count (10^${data.baselines.zxcvbn.log10_guesses.toFixed(1)})`;
       }
+
+      calloutVerdictBadge.textContent = `• Shared verdict: ${label.toLowerCase()}`;
+      calloutVerdictBadge.className = 'callout-verdict-badge verdict-' + label.toLowerCase();
     }
 
     function escapeHtml(text) {
@@ -1108,8 +2382,8 @@ p {
       return text.replace(/[&<>"']/g, m => map[m]);
     }
 
-    passwordInput.value = 'Password1!';
-    evaluatePassword(passwordInput.value);
+    // Initial evaluation on load
+    evaluatePassword('Password1!');
   </script>
 </body>
 </html>

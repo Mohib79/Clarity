@@ -37,8 +37,9 @@ python -m venv .venv
 # On Linux/macOS:
 source .venv/bin/activate
 
-# Install requirements
+# Install requirements and package in editable mode
 pip install -r requirements.txt
+pip install -e .
 ```
 
 ---
