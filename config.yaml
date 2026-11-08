@@ -1,0 +1,50 @@
+# Configuration for Probabilistic Password Modeling & Explainable Strength Evaluation
+
+seed: 42
+
+paths:
+  raw_data: "data/raw/rockyou.txt"
+  processed_dir: "data/processed"
+  train_data: "data/processed/train.tsv"
+  val_data: "data/processed/val.tsv"
+  test_data: "data/processed/test.tsv"
+  data_stats: "reports/results/data_stats.json"
+  models_dir: "models"
+  model_file: "models/model.pkl"
+  mc_table: "models/mc_table.npz"
+  wordlists_dir: "src/pwlab/patterns/wordlists"
+  reports_dir: "reports"
+  figures_dir: "reports/figures"
+  results_dir: "reports/results"
+
+cleaning:
+  min_length: 4
+  max_length: 32
+  ascii_only: true
+  drop_whitespace_only: true
+
+split:
+  train_ratio: 0.80
+  test_ratio: 0.20
+  val_ratio_from_train: 0.10
+
+sampling:
+  default_dev_sample: 500000
+  enable_sample_by_default: false
+
+model:
+  ngram_order: 4
+  smoothing: "backoff"
+  additive_delta: 0.01
+  backoff_discount: 0.75
+  mixture_lambda: 0.5
+
+meter:
+  weak_threshold: 6.0
+  strong_threshold: 10.0
+  mc_samples: 50000
+
+evaluation:
+  test_eval_sample: 50000
+  guess_budgets: [1000, 10000, 100000, 1000000, 10000000]
+
