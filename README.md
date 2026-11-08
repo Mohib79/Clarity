@@ -1,13 +1,6 @@
 # Probabilistic Password Modeling & Explainable Strength Evaluation
 
 **Information Security (CS3002) Term Project**  
-*FAST National University of Computer & Emerging Sciences (FAST-NUCES), Lahore*
-
-**Team Members:**
-- Mohib Mansoor (23L-0650)
-- Maaz Mahmood (23L-0728)
-- Junaid Muhammad (23L-1014)
-
 ---
 
 ## 1. Project Overview
