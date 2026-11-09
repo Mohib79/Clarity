@@ -44,7 +44,24 @@ pip install -e .
 
 ---
 
-## 4. CLI Usage Guide
+
+## 4. Running the Privacy-Preserving Web Application
+
+Start the local web prototype:
+
+```bash
+python web/app.py
+```
+Open your browser at **`http://127.0.0.1:5000`**.
+
+**Privacy Guarantees:**
+- Passwords typed in the browser are processed strictly in volatile RAM.
+- Server access logs for password requests are suppressed.
+- Evaluated via `POST /api/score` (never GET), with `Cache-Control: no-store` headers.
+
+---
+
+## 5. CLI Usage Guide
 
 The project provides a unified CLI entry point via `python -m pwlab.cli`:
 
@@ -74,30 +91,6 @@ python -m pwlab.cli score "Password1!"
 python -m pwlab.cli score "Summer2026!"
 python -m pwlab.cli score "correct-horse-battery-staple"
 ```
-
-### Step 5: Run Full Benchmark Suite & Generate Figures
-```bash
-python -m pwlab.cli evaluate --all --test-limit 5000
-```
-*Generates test set coverage curves, meter benchmark comparisons vs. LUDS and zxcvbn, 15 case studies, and charts in `reports/figures/`.*
-
----
-
-## 5. Running the Privacy-Preserving Web Application
-
-Start the local web prototype:
-
-```bash
-python web/app.py
-```
-Open your browser at **`http://127.0.0.1:5000`**.
-
-**Privacy Guarantees:**
-- Passwords typed in the browser are processed strictly in volatile RAM.
-- Server access logs for password requests are suppressed.
-- Evaluated via `POST /api/score` (never GET), with `Cache-Control: no-store` headers.
-
----
 
 ## 6. Running Unit Tests
 
