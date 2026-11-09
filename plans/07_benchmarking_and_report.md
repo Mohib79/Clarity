@@ -34,3 +34,4 @@
 ## Acceptance criteria
 - [x] `python -m pwlab.cli evaluate --all` regenerates every table and figure from scratch.
 - [x] Report complete with all figures and data referenced.
+DONE!

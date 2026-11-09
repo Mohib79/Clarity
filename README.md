@@ -27,8 +27,8 @@ This project implements a complete statistical password modeling engine trained 
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/Mohib79/IS_Project.git
-cd IS_Project
+git clone https://github.com/Mohib79/Clarity.git
+cd Clarity
 
 # Create and activate virtual environment
 python -m venv .venv
