@@ -19,6 +19,15 @@ data/processed/*
 !data/processed/.gitkeep
 models/*
 !models/.gitkeep
+!models/model.pkl
+!models/model.markov.pkl
+!models/model.struct.pkl
+!models/model.gru.npz
+!models/model.gpt.npz
+!models/mc_table.npz
+
+# Local hardware spec reference
+Legion_Pro_5_*.pdf
 
 # Testing and temporary files
 .pytest_cache/

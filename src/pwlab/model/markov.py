@@ -1,16 +1,16 @@
 """
-Character-level n-gram Markov model with smoothing.
-Supports additive (Laplace/delta) and interpolated backoff smoothing,
-perplexity evaluation, next-character distribution generation, and sampling.
-High performance implementation with distribution caching.
+Character-level n-gram Markov model with Kneser-Ney / Interpolated Backoff smoothing
+and positional awareness.
+Supports additive (Laplace/delta), Witten-Bell interpolated backoff, and Interpolated
+Kneser-Ney discounting, perplexity evaluation, per-character surprise analysis,
+next-character distribution generation, and fast cached sampling.
 """
 
 from collections import Counter, defaultdict
 import math
 import pickle
 import random
-import string
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 START_TOKEN = "\x02"  # STX
@@ -26,13 +26,14 @@ CHAR_TO_IDX = {c: i for i, c in enumerate(VOCABULARY)}
 class MarkovModel:
     """
     Character-level n-gram Markov model.
-    Learns conditional character transition probabilities P(c_i | c_{i-n+1}...c_{i-1}).
+    Learns conditional character transition probabilities P(c_i | c_{i-n+1}...c_{i-1})
+    with Interpolated Kneser-Ney / Backoff discounting and continuation probabilities.
     """
 
     def __init__(
         self,
         order: int = 4,
-        smoothing: str = "backoff",  # 'additive' or 'backoff'
+        smoothing: str = "backoff",  # 'additive', 'backoff', or 'kneser_ney'
         additive_delta: float = 0.01,
         backoff_discount: float = 0.75,
     ):
@@ -46,6 +47,8 @@ class MarkovModel:
         self.counts: Dict[int, Dict[str, Counter]] = {k: defaultdict(Counter) for k in range(1, order + 1)}
         self.context_totals: Dict[int, Dict[str, int]] = {k: defaultdict(int) for k in range(1, order + 1)}
         self.unigram_counts: Counter = Counter()
+        self.continuation_counts: Counter = Counter()
+        self.total_continuation_types: int = 0
         self.total_tokens = 0
         self._dist_cache: Dict[str, Tuple[List[str], List[float]]] = {}
 
@@ -57,10 +60,12 @@ class MarkovModel:
     def train(self, items: List[Tuple[str, int]]) -> None:
         """
         Train n-gram model from a list of (password, count) tuples.
+        Computes both frequency counts and Kneser-Ney continuation counts.
         """
         self.counts = {k: defaultdict(Counter) for k in range(1, self.order + 1)}
         self.context_totals = {k: defaultdict(int) for k in range(1, self.order + 1)}
         self.unigram_counts = Counter()
+        self.continuation_counts = Counter()
         self.total_tokens = 0
         self._dist_cache.clear()
 
@@ -78,6 +83,13 @@ class MarkovModel:
                     self.counts[k][ctx][target_char] += weight
                     self.context_totals[k][ctx] += weight
 
+        # Compute Kneser-Ney continuation counts: number of distinct 1-char histories preceding each char
+        if self.order >= 2 and 2 in self.counts:
+            for ctx, char_counter in self.counts[2].items():
+                for ch in char_counter:
+                    self.continuation_counts[ch] += 1
+        self.total_continuation_types = sum(self.continuation_counts.values())
+
     def char_prob(self, context: str, char: str) -> float:
         """Compute P(char | context) with configured smoothing."""
         if self.smoothing == "additive":
@@ -94,8 +106,19 @@ class MarkovModel:
         return (c_count + self.additive_delta) / (total + self.additive_delta * VOCAB_SIZE)
 
     def _char_prob_backoff(self, context: str, char: str) -> float:
-        """Interpolated backoff smoothing."""
+        """
+        Interpolated Kneser-Ney / Witten-Bell Backoff smoothing.
+        Guarantees exact probability normalization sum_{c in VOCABULARY} P(c | context) == 1.0.
+        """
+        # Base distribution: blend uniform prior with Kneser-Ney continuation probability
         prob = 1.0 / VOCAB_SIZE
+        if self.total_continuation_types > 0:
+            cont_p = (self.continuation_counts.get(char, 0) + 0.5) / (
+                self.total_continuation_types + 0.5 * VOCAB_SIZE
+            )
+            prob = 0.5 * cont_p + 0.5 * prob
+
+        discount = max(0.0, min(self.backoff_discount, 0.95))
 
         for k in range(1, self.order + 1):
             ctx = context[-(k - 1):] if k > 1 else ""
@@ -104,10 +127,25 @@ class MarkovModel:
 
             if total > 0 and c_counts:
                 c_count = c_counts.get(char, 0)
-                mle = c_count / total
                 num_distinct = len(c_counts)
-                lambda_weight = total / (total + num_distinct)
-                prob = lambda_weight * mle + (1.0 - lambda_weight) * prob
+
+                if self.smoothing == "kneser_ney":
+                    # Absolute discounting (Interpolated Kneser-Ney)
+                    d_eff = min(discount, 0.9)
+                    discounted_mle = max(c_count - d_eff, 0.0) / total
+                    bow = (d_eff * num_distinct) / total
+                    prob = discounted_mle + bow * prob
+                else:
+                    # Hybrid Witten-Bell + Kneser-Ney discounting
+                    d_eff = discount * 0.25
+                    discounted_mle = max(c_count - d_eff, 0.0) / total
+                    rem_mass = (d_eff * num_distinct) / total if c_count > 0 else 0.0
+                    # Exact normalization across all c in VOCABULARY:
+                    # Sum_c max(c_count - d_eff, 0)/total = (total - d_eff * num_distinct) / total
+                    wb_lambda = total / (total + num_distinct)
+                    kn_stay = 1.0 - (d_eff * num_distinct) / total
+                    stay_mass = wb_lambda * kn_stay
+                    prob = wb_lambda * discounted_mle + (1.0 - stay_mass) * prob
 
         return prob
 
@@ -123,6 +161,28 @@ class MarkovModel:
             logp += math.log(max(p, 1e-15))
 
         return logp
+
+    def char_surprises(self, pw: str) -> List[Dict[str, Any]]:
+        """
+        Compute per-character conditional probability and surprise (-log2 P(c_i | c_<i))
+        for explainable character-level heatmap visualization.
+        """
+        if not pw:
+            return []
+        padded = self._pad_password(pw)
+        out: List[Dict[str, Any]] = []
+        for idx, ch in enumerate(pw):
+            pos = (self.order - 1) + idx
+            ctx = padded[pos - (self.order - 1):pos]
+            p = max(self.char_prob(ctx, ch), 1e-12)
+            bits = -math.log2(p)
+            out.append({
+                "index": idx,
+                "char": ch,
+                "prob": round(p, 6),
+                "bits": round(bits, 2),
+            })
+        return out
 
     def get_sampling_dist(self, context: str) -> Tuple[List[str], List[float]]:
         """Fast cached distribution for sampling."""
@@ -178,6 +238,8 @@ class MarkovModel:
             "counts": {k: {ctx: dict(counter) for ctx, counter in self.counts[k].items()} for k in self.counts},
             "context_totals": {k: dict(totals) for k, totals in self.context_totals.items()},
             "unigram_counts": dict(self.unigram_counts),
+            "continuation_counts": dict(self.continuation_counts),
+            "total_continuation_types": self.total_continuation_types,
             "total_tokens": self.total_tokens,
         }
         with open(path, "wb") as f:
@@ -197,6 +259,8 @@ class MarkovModel:
         )
         m.total_tokens = data["total_tokens"]
         m.unigram_counts = Counter(data["unigram_counts"])
+        m.continuation_counts = Counter(data.get("continuation_counts", {}))
+        m.total_continuation_types = data.get("total_continuation_types", sum(m.continuation_counts.values()))
 
         m.counts = {}
         m.context_totals = {}

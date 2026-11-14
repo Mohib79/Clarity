@@ -149,6 +149,40 @@ class TestPasswordModelFacade(unittest.TestCase):
                 load_h = loaded.logprob(cand, kind="hybrid")
                 self.assertAlmostEqual(orig_h, load_h, places=6)
 
+    def test_kneser_ney_and_char_surprises(self):
+        """Verify Kneser-Ney smoothing normalization and per-character surprise output."""
+        kn_model = MarkovModel(order=4, smoothing="kneser_ney")
+        kn_model.train(self.train_data)
+        total_p = sum(kn_model.char_prob("pas", c) for c in VOCABULARY)
+        self.assertAlmostEqual(total_p, 1.0, places=5)
+
+        surp = self.model.char_surprises("Password1!")
+        self.assertEqual(len(surp), len("Password1!"))
+        self.assertTrue(all("bits" in item and item["bits"] >= 0 for item in surp))
+
+    def test_neural_gru_and_passgpt_and_generator(self):
+        """Verify Char-GRU, PassGPT Transformer, and PriorityQueueGuessGenerator."""
+        from pwlab.model.neural_gru import CharGRUModel
+        from pwlab.model.transformer import PassGPTModel
+        from pwlab.model.generator import PriorityQueueGuessGenerator
+
+        gru = CharGRUModel(d_model=32, num_layers=1, max_len=18)
+        gru.train(self.train_data, epochs=2, batch_size=4)
+        self.assertTrue(math.isfinite(gru.logprob("password")))
+        self.assertGreater(gru.logprob("password"), gru.logprob("x7#Qp!vR2m"))
+
+        gpt = PassGPTModel(d_model=32, n_heads=4, n_layers=1, max_len=18)
+        gpt.train(self.train_data, epochs=2, batch_size=4)
+        self.assertTrue(math.isfinite(gpt.logprob("password")))
+        self.assertEqual(len(gpt.char_surprises("password")), 8)
+
+        gen = PriorityQueueGuessGenerator(self.model)
+        top_guesses = gen.generate_top_guesses(max_guesses=15)
+        self.assertGreater(len(top_guesses), 0)
+        # Ensure descending probability order
+        lps = [lp for _, lp in top_guesses]
+        self.assertEqual(lps, sorted(lps, reverse=True))
+
 
 if __name__ == "__main__":
     unittest.main()

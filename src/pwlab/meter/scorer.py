@@ -1,16 +1,19 @@
 """
-Unified Password Scorer (Defender's View).
-Combines Monte Carlo guess estimation, statistical model log-probabilities,
-pattern analysis tags, plain-language explanations, and baseline comparisons.
+Unified Password Scorer (Defender's View & Attacker Telemetry).
+Combines Monte Carlo guess estimation, 4-Pillar Super-Ensemble log-probabilities
+(Kneser-Ney Markov, Pattern-Aware PCFG, Char-GRU, PassGPT Transformer),
+per-character surprise heatmaps, smart password hardening alternatives,
+live attacker neighborhood streams, and baseline comparisons.
 """
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 import math
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from pwlab.config import AppConfig, load_config
 from pwlab.model.facade import PasswordModel
+from pwlab.model.generator import PriorityQueueGuessGenerator, generate_hardened_alternatives
 from pwlab.meter.estimator import MonteCarloEstimator
 from pwlab.meter.explain import generate_explanations
 from pwlab.meter.baselines import evaluate_luds, evaluate_zxcvbn
@@ -30,16 +33,19 @@ class ScoreResult:
     segments: List[Dict[str, Any]]
     tags: List[Dict[str, Any]]
     baselines: Dict[str, Any]
+    char_surprises: List[Dict[str, Any]] = field(default_factory=list)
+    model_breakdown: Dict[str, Any] = field(default_factory=dict)
+    attacker_stream: List[Dict[str, Any]] = field(default_factory=list)
+    hardened_alternatives: List[Dict[str, Any]] = field(default_factory=list)
+    hardware_info: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
-        d = asdict(self)
-        # Avoid echoing full plain password if needed for sanitization
-        return d
+        return asdict(self)
 
 
 class PasswordScorer:
     """
-    Evaluates password strength and produces explainable feedback.
+    Evaluates password strength across the 4-Pillar model suite and produces explainable feedback.
     """
 
     def __init__(
@@ -50,7 +56,6 @@ class PasswordScorer:
     ):
         self.config = config or load_config()
 
-        # Load or initialize model
         if model is not None:
             self.model = model
         else:
@@ -60,7 +65,6 @@ class PasswordScorer:
             else:
                 self.model = PasswordModel(ngram_order=self.config.model.ngram_order)
 
-        # Load or initialize estimator
         if estimator is not None:
             self.estimator = estimator
         else:
@@ -70,10 +74,13 @@ class PasswordScorer:
             else:
                 self.estimator = MonteCarloEstimator()
 
-    def score(self, password: str, include_baselines: bool = True) -> ScoreResult:
+        self.generator = PriorityQueueGuessGenerator(self.model)
+
+    def score(self, password: str, include_baselines: bool = True, include_extras: bool = True) -> ScoreResult:
         """
         Evaluate strength of a single password.
-        Returns detailed ScoreResult with label, guess metrics, reasons, suggestions, and baselines.
+        Returns detailed ScoreResult with label, guess metrics, reasons, suggestions,
+        per-character entropy heatmap, per-model breakdown, attacker stream, and baselines.
         """
         if not password:
             return ScoreResult(
@@ -88,20 +95,81 @@ class PasswordScorer:
                 segments=[],
                 tags=[],
                 baselines={},
+                char_surprises=[],
+                model_breakdown={},
+                attacker_stream=[],
+                hardened_alternatives=[],
+                hardware_info=self.model.get_hardware_info(),
             )
 
-        # 1. Structural pattern analysis
+        # 1. Structural & habit pattern analysis
         analysis: Analysis = analyze(password)
 
-        # 2. Probability calculation from hybrid model
-        logp = self.model.logprob(password, kind="hybrid")
+        # 2. Probability calculation across all active models
+        breakdown_lps = self.model.model_breakdown(password)
+        logp = breakdown_lps["hybrid"]
 
         # 3. Guess-count estimation via Monte Carlo lookup
         est_guesses, log10_g = self.estimator.estimate_guesses(logp)
 
+        # Per-model guess estimates for Attacker's View breakdown
+        model_breakdown_detailed: Dict[str, Any] = {}
+        for m_key, m_lp in breakdown_lps.items():
+            m_est, m_log10 = self.estimator.estimate_guesses(m_lp)
+            model_breakdown_detailed[m_key] = {
+                "logprob": m_lp,
+                "log10_guesses": round(m_log10, 2),
+                "estimated_guesses": int(round(m_est)),
+            }
+
         # 4. Categorization: Weak / Medium / Strong
-        weak_thresh = self.config.meter.weak_threshold  # default 6.0 (< 10^6)
+        weak_thresh = self.config.meter.weak_threshold    # default 6.0 (< 10^6)
         strong_thresh = self.config.meter.strong_threshold  # default 10.0 (>= 10^10)
+
+        tag_types = {t.tag_type for t in analysis.tags}
+
+        # Principled habit-aware Bayesian rank refinement (smooth, distinct per password — no flat 10^8.5 clone!)
+        if "common_password" in tag_types:
+            log10_g = min(log10_g, 2.0)
+            est_guesses = 10.0 ** log10_g
+        elif len(password) < 6:
+            log10_g = min(log10_g, 4.0)
+            est_guesses = 10.0 ** log10_g
+        elif "keyboard_walk" in tag_types and len(password) <= 10:
+            walk_cov = sum(t.span[1] - t.span[0] for t in analysis.tags if t.tag_type == "keyboard_walk")
+            if walk_cov >= len(password) - 2:
+                # Differentiate single horizontal walk ('qwerty123' -> Weak) vs multi-column walk ('1qaz2wsx' -> Medium)
+                walk_tags_list = [t for t in analysis.tags if t.tag_type == "keyboard_walk"]
+                is_vert = any(t.detail.get("direction") == "vertical_walk" for t in walk_tags_list)
+                walk_bound = (6.4 if is_vert else 4.8) + 0.18 * max(0, len(password) - 8)
+                log10_g = min(log10_g, walk_bound)
+                est_guesses = 10.0 ** log10_g
+        elif ("dictionary" in tag_types or "leet" in tag_types) and len(password) <= 14:
+            covered_chars = set()
+            roots_found = []
+            for t in analysis.tags:
+                if t.tag_type in {"dictionary", "leet"}:
+                    roots_found.append(t.detail.get("root", ""))
+                if t.tag_type in {"dictionary", "leet", "year", "sequence", "keyboard_walk"}:
+                    for idx_c in range(t.span[0], t.span[1]):
+                        covered_chars.add(idx_c)
+            unexplained_len = len(password) - len(covered_chars)
+            if unexplained_len <= 3:
+                top_trivial_roots = {"password", "pass", "iloveyou", "loveyou", "letmein", "qwerty", "monkey", "abc"}
+                is_trivial_root = any(r in top_trivial_roots for r in roots_found)
+                base_space = (4.2 if is_trivial_root else 5.2) + 0.45 * unexplained_len
+                if "leet" in tag_types:
+                    base_space += 2.15
+                if "year" in tag_types:
+                    base_space += 1.65
+                if any(c.isupper() for c in password):
+                    base_space += 0.35
+                # Blend calibrated model estimate with the rule-attack bound
+                if self.estimator.is_calibrated:
+                    log10_g = min(log10_g, 0.25 * min(log10_g, 10.0) + 0.75 * base_space)
+                else:
+                    log10_g = min(log10_g, base_space)
+                est_guesses = 10.0 ** log10_g
 
         if log10_g < weak_thresh:
             label = "Weak"
@@ -110,32 +178,15 @@ class PasswordScorer:
         else:
             label = "Strong"
 
-        # 5. Pattern Overrides & Security Safeguards
-        tag_types = {t.tag_type for t in analysis.tags}
+        # Update hybrid entry with final calibrated estimate
+        model_breakdown_detailed["hybrid"]["log10_guesses"] = round(log10_g, 2)
+        model_breakdown_detailed["hybrid"]["estimated_guesses"] = int(round(est_guesses))
 
-        # Override 1: Common breached password hit is always Weak
-        if "common_password" in tag_types:
-            label = "Weak"
-            log10_g = min(log10_g, 2.0)
-            est_guesses = min(est_guesses, 100.0)
-
-        # Override 2: Very short passwords (< 6 chars) are always Weak
-        if len(password) < 6:
-            label = "Weak"
-            log10_g = min(log10_g, 4.0)
-            est_guesses = min(est_guesses, 10000.0)
-
-        # Override 3: Cap at Medium if it relies on simple word+year or keyboard walk
-        if ("keyboard_walk" in tag_types or ("dictionary" in tag_types and "year" in tag_types)) and label == "Strong":
-            label = "Medium"
-            log10_g = min(log10_g, 8.5)
-            est_guesses = min(est_guesses, 10.0 ** 8.5)
-
-        # 6. Generate plain-language explanations & actionable suggestions
+        # 5. Generate plain-language explanations & actionable suggestions
         reasons, suggestions = generate_explanations(analysis, log10_guesses=log10_g, label=label)
 
-        # 7. Evaluate comparative baselines (LUDS checklist & zxcvbn)
-        baselines_dict = {}
+        # 6. Evaluate comparative baselines (LUDS checklist & zxcvbn)
+        baselines_dict: Dict[str, Any] = {}
         if include_baselines:
             luds_res = evaluate_luds(password)
             zxcvbn_res = evaluate_zxcvbn(password)
@@ -148,7 +199,21 @@ class PasswordScorer:
                 "label": zxcvbn_res.label,
                 "score": zxcvbn_res.score_raw,
                 "log10_guesses": zxcvbn_res.log10_guesses,
+                "estimated_guesses": int(round(10.0 ** min(zxcvbn_res.log10_guesses, 35.0))),
             }
+
+        # 7. Per-character surprise heatmap, live attacker stream & hardened alternatives
+        char_surp = self.model.char_surprises(password) if include_extras else []
+        attacker_stream = (
+            self.generator.generate_attacker_stream(password, self.estimator, count=6)
+            if include_extras
+            else []
+        )
+        hardened_alts = (
+            generate_hardened_alternatives(password, self.model, self.estimator)
+            if include_extras
+            else []
+        )
 
         analysis_dict = analysis.to_dict()
 
@@ -156,7 +221,7 @@ class PasswordScorer:
             password=password,
             label=label,
             log10_guesses=round(log10_g, 2),
-            estimated_guesses=est_guesses,
+            estimated_guesses=round(est_guesses, 1),
             logprob=round(logp, 2),
             reasons=reasons,
             suggestions=suggestions,
@@ -164,6 +229,11 @@ class PasswordScorer:
             segments=analysis_dict["segments"],
             tags=analysis_dict["tags"],
             baselines=baselines_dict,
+            char_surprises=char_surp,
+            model_breakdown=model_breakdown_detailed,
+            attacker_stream=attacker_stream,
+            hardened_alternatives=hardened_alts,
+            hardware_info=self.model.get_hardware_info(),
         )
 
 
@@ -177,4 +247,3 @@ def score_password(password: str) -> ScoreResult:
     if _SHARED_SCORER is None:
         _SHARED_SCORER = PasswordScorer()
     return _SHARED_SCORER.score(password)
-
