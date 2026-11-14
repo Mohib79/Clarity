@@ -5,7 +5,8 @@ Usage:
     python -m pwlab.cli prepare [--raw PATH] [--sample N] [--max-raw-lines M] [--full] [--config PATH]
     python -m pwlab.cli analyze "Summer2026!"
     python -m pwlab.cli analyze-train [--limit N]
-    python -m pwlab.cli train [--max-train N] [--quick]
+    python -m pwlab.cli train [--max-train N] [--quick] [--no-neural]
+    python -m pwlab.cli generate [--count N]
     python -m pwlab.cli score "Password123!"
     python -m pwlab.cli evaluate [--all] [--test-limit N]
 """
@@ -15,9 +16,12 @@ import sys
 from pathlib import Path
 
 from pwlab.config import load_config
+from pwlab.data.download import ensure_rockyou_dataset
 from pwlab.data.prepare import prepare_dataset
 from pwlab.patterns.taggers import analyze
 from pwlab.patterns.stats import compute_pattern_stats
+from pwlab.model.facade import PasswordModel
+from pwlab.model.generator import PriorityQueueGuessGenerator
 from pwlab.model.train import run_model_training_pipeline
 from pwlab.meter.scorer import PasswordScorer
 from pwlab.eval.model_eval import run_evaluation_cli
@@ -26,13 +30,18 @@ from pwlab.eval.plots import generate_all_figures
 
 
 def cmd_prepare(args):
-    """Handle dataset preparation command."""
+    """Handle dataset preparation command (auto-downloading RockYou if missing)."""
     cfg = load_config(args.config)
     if args.seed is not None:
         cfg.seed = args.seed
 
+    raw_file = args.raw or cfg.paths.raw_data
+    if not Path(raw_file).exists():
+        print(f"[*] Raw dataset not found at {raw_file}. Initializing RockYou corpus builder...", flush=True)
+        ensure_rockyou_dataset(output_path=raw_file, seed=cfg.seed)
+
     print(f"[*] Starting dataset preparation pipeline...", flush=True)
-    print(f"    Raw file: {args.raw or cfg.paths.raw_data}", flush=True)
+    print(f"    Raw file: {raw_file}", flush=True)
     print(f"    Seed: {cfg.seed}", flush=True)
 
     if args.full:
@@ -53,7 +62,7 @@ def cmd_prepare(args):
 
     stats, paths = prepare_dataset(
         config=cfg,
-        raw_path=args.raw,
+        raw_path=raw_file,
         sample_size=sample_size,
         max_raw_lines=args.max_raw_lines,
         full=args.full,
@@ -121,7 +130,7 @@ def cmd_analyze_train(args):
 
 
 def cmd_train(args):
-    """Train the statistical n-gram and structure models."""
+    """Train the 4-Pillar statistical and deep neural password models."""
     cfg = load_config(args.config)
     run_model_training_pipeline(
         config=cfg,
@@ -130,7 +139,26 @@ def cmd_train(args):
         output_model_path=args.output,
         quick_tune=args.quick,
         max_train_rows=args.max_train,
+        train_neural=not args.no_neural,
+        neural_epochs=args.epochs,
     )
+
+
+def cmd_generate(args):
+    """Generate ordered password guesses using the Priority-Queue Guess Generator."""
+    cfg = load_config(args.config)
+    model = PasswordModel.load(cfg.paths.model_file)
+    gen = PriorityQueueGuessGenerator(model)
+    guesses = gen.generate_top_guesses(max_guesses=args.count)
+
+    print(f"\n[+] Top {len(guesses)} Priority-Queue Candidate Guesses (Descending Probability):")
+    print("    --------------------------------------------------------")
+    print("    Rank    Candidate Password          Log-Prob    Structure")
+    print("    --------------------------------------------------------")
+    from pwlab.patterns.segmenter import structure as get_struct
+    for rank, (pw, lp) in enumerate(guesses, start=1):
+        print(f"    #{rank:<6d} {pw:<26}  {lp:>8.2f}    {get_struct(pw)}")
+    print("    --------------------------------------------------------\n")
 
 
 def cmd_score(args):
@@ -146,13 +174,21 @@ def cmd_score(args):
     }
     badge = badge_symbols.get(res.label, res.label)
 
-    print("\n" + "=" * 65)
+    print("\n" + "=" * 70)
     print(f"   PASSWORD STRENGTH EVALUATION: '{res.password}'")
-    print("=" * 65)
+    print("=" * 70)
     print(f"  Rating:             {badge}")
     print(f"  Estimated Guesses:  10^{res.log10_guesses:.2f} (~{res.estimated_guesses:,.0f} guesses)")
-    print(f"  Model Log-Prob:     {res.logprob:.2f}")
+    print(f"  Ensemble Log-Prob:  {res.logprob:.2f}")
     print(f"  Structural Pattern: {res.structure}")
+    hw = res.hardware_info
+    if hw:
+        print(f"  Engine Telemetry:   {hw.get('device_name', 'CPU')} (Active: {', '.join(hw.get('active_models', []))})")
+
+    if res.model_breakdown:
+        print("\n  4-Pillar Model Breakdown:")
+        for m_name, m_data in res.model_breakdown.items():
+            print(f"    - {m_name.upper():<10}: ln P = {m_data['logprob']:>7.2f} | ~10^{m_data['log10_guesses']:.2f} guesses")
 
     print("\n  Structural Segmentation:")
     for seg in res.segments:
@@ -166,24 +202,28 @@ def cmd_score(args):
     for s in res.suggestions:
         print(f"    > {s}")
 
+    if res.hardened_alternatives:
+        print("\n  Smart Hardened Alternatives:")
+        for alt in res.hardened_alternatives:
+            print(f"    + [{alt['strategy']}]: '{alt['password']}' (~10^{alt['log10_guesses']} guesses)")
+
     print("\n  Comparative Benchmarking vs. Industry Baselines:")
     luds = res.baselines.get("luds", {})
     zxc = res.baselines.get("zxcvbn", {})
     print(f"    - LUDS Checklist Rule Meter: {luds.get('label', 'N/A')} ({luds.get('score', 'N/A')} criteria passed)")
     print(f"    - zxcvbn Estimator:          {zxc.get('label', 'N/A')} (Score: {zxc.get('score', 'N/A')}/4, ~10^{zxc.get('log10_guesses', 0):.1f} guesses)")
-    print("=" * 65 + "\n")
+    print("=" * 70 + "\n")
 
 
 def cmd_evaluate(args):
     """Run offline benchmarking against held-out test set."""
     cfg = load_config(args.config)
 
-    # 1. Test set coverage evaluation vs baseline
-    print("[*] Running Test Set Coverage Evaluation (Plan 04)...")
+    print("[*] Running Multi-Model Test Set Coverage Evaluation...")
     run_evaluation_cli(config=cfg, test_limit=args.test_limit)
 
     if args.all:
-        print("\n[*] Running Meter Benchmarks vs. LUDS & zxcvbn (Plan 07)...")
+        print("\n[*] Running Meter Benchmarks vs. LUDS & zxcvbn...")
         scorer = PasswordScorer(config=cfg)
         run_meter_benchmark(scorer=scorer, sample_size=args.test_limit)
 
@@ -199,7 +239,7 @@ def cmd_evaluate(args):
 def main():
     parser = argparse.ArgumentParser(
         prog="pwlab",
-        description="Probabilistic Password Modeling & Explainable Strength Evaluation",
+        description="Probabilistic & Deep Neural Password Modeling & Explainable Strength Evaluation",
     )
     parser.add_argument("--config", default="config.yaml", help="Path to configuration YAML file")
 
@@ -227,13 +267,20 @@ def main():
     p_atrain.set_defaults(func=cmd_analyze_train)
 
     # train
-    p_train = subparsers.add_parser("train", help="Train the statistical n-gram and structure models")
+    p_train = subparsers.add_parser("train", help="Train the 4-Pillar statistical and deep neural models")
     p_train.add_argument("--train", default=None, help="Path to train.tsv (defaults to config)")
     p_train.add_argument("--val", default=None, help="Path to val.tsv (defaults to config)")
     p_train.add_argument("--output", default=None, help="Output model path (defaults to models/model.pkl)")
     p_train.add_argument("--max-train", type=int, default=None, help="Limit number of train items")
     p_train.add_argument("--quick", action="store_true", help="Run quick validation tuning")
+    p_train.add_argument("--no-neural", action="store_true", help="Skip GPU neural training (train Markov+PCFG only)")
+    p_train.add_argument("--epochs", type=int, default=4, help="Epochs for Char-GRU and PassGPT training")
     p_train.set_defaults(func=cmd_train)
+
+    # generate
+    p_gen = subparsers.add_parser("generate", help="Generate top candidate guesses in likelihood order")
+    p_gen.add_argument("--count", type=int, default=25, help="Number of guesses to generate")
+    p_gen.set_defaults(func=cmd_generate)
 
     # score
     p_score = subparsers.add_parser("score", help="Evaluate password strength and generate explanation")

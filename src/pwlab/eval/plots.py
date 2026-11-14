@@ -3,6 +3,7 @@ Plotting and figure generation for research report.
 Generates publication-quality charts using Matplotlib (no external pandas dependency).
 """
 
+import csv
 from pathlib import Path
 import matplotlib.pyplot as plt
 
@@ -10,6 +11,7 @@ import matplotlib.pyplot as plt
 def generate_all_figures(
     pattern_stats_csv: str = "reports/results/pattern_stats.csv",
     meter_comparison_csv: str = "reports/results/meter_comparison.csv",
+    model_selection_csv: str = "reports/results/model_selection.csv",
     output_dir: str = "reports/figures",
 ):
     """Generate all analytical figures from experimental CSV results."""
@@ -109,3 +111,38 @@ def generate_all_figures(
             plt.savefig(out_dir / "meter_unsafe_strong_comparison.png")
             plt.close()
             print(f"[+] Saved: {out_dir / 'meter_unsafe_strong_comparison.png'}")
+
+    # 4. Multi-Architecture Perplexity Comparison Plot
+    p_sel = Path(model_selection_csv)
+    if p_sel.exists():
+        model_names = []
+        ppls = []
+        with open(p_sel, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                m_name = row.get("Model") or f"Order-{row.get('Order')} ({row.get('Smoothing')})"
+                val_p = float(row.get("Validation_Perplexity", 0.0))
+                if val_p > 0:
+                    model_names.append(m_name)
+                    ppls.append(val_p)
+
+        if model_names and ppls:
+            plt.figure(figsize=(9.5, 5), dpi=300)
+            bar_colors = [
+                "#1d4ed8" if "Ensemble" in m else ("#7c3aed" if "PassGPT" in m or "GRU" in m else "#64748b")
+                for m in model_names
+            ]
+            bars = plt.barh(range(len(model_names)), ppls, color=bar_colors, height=0.6)
+            plt.yticks(range(len(model_names)), model_names, fontsize=9.5, fontweight="bold")
+            plt.gca().invert_yaxis()
+            plt.xlabel("Held-Out Validation Perplexity (Lower is Better)", fontsize=11, fontweight="bold")
+            plt.title("Model Architecture Comparison: Statistical N-Grams vs. Deep Neural & Super-Ensemble", fontsize=11.5, fontweight="bold")
+            plt.grid(axis="x", linestyle=":", alpha=0.6)
+            for bar in bars:
+                w = bar.get_width()
+                plt.text(w + 0.15, bar.get_y() + bar.get_height() / 2.0, f"{w:.2f}", va="center", ha="left", fontsize=9, fontweight="bold")
+            plt.xlim(0, max(ppls) * 1.15)
+            plt.tight_layout()
+            plt.savefig(out_dir / "model_perplexity_comparison.png")
+            plt.close()
+            print(f"[+] Saved: {out_dir / 'model_perplexity_comparison.png'}")

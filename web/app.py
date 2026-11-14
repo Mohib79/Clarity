@@ -1,9 +1,9 @@
 """
-Privacy-Preserving Flask Web Application for Explainable Password Strength Evaluation.
+Privacy-Preserving Flask Web Application for Explainable Password Strength Evaluation
+powered by the Clarity 4-Pillar Statistical & Deep Neural Super-Ensemble.
 """
 
 import logging
-import os
 import sys
 from pathlib import Path
 
@@ -29,7 +29,7 @@ app = Flask(
 )
 app.config["MAX_CONTENT_LENGTH"] = 1024  # Max 1 KB payload
 
-# Initialize shared scorer once at startup
+# Initialize shared scorer at startup
 config = load_config(str(ROOT_DIR / "config.yaml"))
 scorer = PasswordScorer(config=config)
 
@@ -61,7 +61,8 @@ def index():
 @app.route("/api/score", methods=["POST"])
 def api_score():
     """
-    Evaluate a password and return strength rating and structural explanation.
+    Evaluate a password and return strength rating, per-character entropy heatmap,
+    4-pillar model breakdown, hardened alternatives, and structural explanation.
     Never accepts GET requests to prevent passwords appearing in query strings or server access logs.
     """
     if not request.is_json:
@@ -73,12 +74,27 @@ def api_score():
     if len(password) > 128:
         return jsonify({"error": "Password exceeds maximum allowable length of 128 characters"}), 400
 
-    res = scorer.score(password, include_baselines=True)
+    res = scorer.score(password, include_baselines=True, include_extras=True)
     return jsonify(res.to_dict())
 
 
+@app.route("/api/generate", methods=["POST"])
+def api_generate():
+    """Return top Priority-Queue candidate guesses from the trained model."""
+    data = request.get_json(silent=True) or {}
+    count = min(max(int(data.get("count", 15)), 1), 50)
+    guesses = scorer.generator.generate_top_guesses(max_guesses=count)
+    return jsonify({
+        "guesses": [
+            {"rank": idx + 1, "password": pw, "logprob": round(lp, 2)}
+            for idx, (pw, lp) in enumerate(guesses)
+        ]
+    })
+
+
 if __name__ == "__main__":
-    print("[*] Starting Privacy-Preserving Password Strength Web App...")
+    print("[*] Starting Clarity v2.0 Privacy-Preserving Password Strength Web App...")
     print("    URL: http://127.0.0.1:5000")
-    print("    Privacy Notice: Passwords are evaluated in memory and NEVER logged or stored.")
+    print("    Engine: 4-Pillar Super-Ensemble (Kneser-Ney Markov + PCFG + Char-GRU + PassGPT)")
+    print("    Privacy Notice: Passwords are evaluated in volatile RAM and NEVER logged or stored.")
     app.run(host="127.0.0.1", port=5000, debug=False)
